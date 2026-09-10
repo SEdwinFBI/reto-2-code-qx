@@ -52,6 +52,7 @@ export const LandingContainer: React.FC = () => {
     currentStep,
     formData,
     updateField,
+    consultarPersona,
     nextStep,
     prevStep,
     submitSolicitud,
@@ -100,6 +101,7 @@ export const LandingContainer: React.FC = () => {
         currentStep={currentStep}
         formData={formData}
         updateField={updateField}
+        onConsultarPersona={consultarPersona}
         nextStep={nextStep}
         prevStep={prevStep}
         onSubmit={submitSolicitud}
