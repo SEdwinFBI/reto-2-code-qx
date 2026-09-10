@@ -3,6 +3,7 @@
 import React from "react";
 import { Shield, FileText, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 interface HeaderProps {
   onOpenSolicitud: () => void;
@@ -40,15 +41,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
             <span>Llenar solicitud de exoneración</span>
           </Button>
 
-          <Button
-            size="sm"
-            onClick={onOpenChat}
-            className="font-medium shadow-xs"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">Chatear con el Asistente</span>
-            <span className="sm:hidden">Asistente</span>
-          </Button>
+          <MagneticButton strength={0.3} maxDistance={20}>
+            <Button
+              size="sm"
+              onClick={onOpenChat}
+              className="font-medium shadow-xs cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Chatear con el Asistente</span>
+              <span className="sm:hidden">Asistente</span>
+            </Button>
+          </MagneticButton>
         </div>
       </div>
     </header>

@@ -1,4 +1,5 @@
 export * from "./components/ChatDrawer";
+export * from "./components/ChatEmbeddedSection";
 export * from "./components/ChatFloatingButton";
 export * from "./components/ChatMessageItem";
 export * from "./components/ChatSuggestions";

@@ -1,31 +1,33 @@
 import React from "react";
-import { Clock, Users, MapPin, FileCheck } from "lucide-react";
+import { PlusCircle, Plane, Lock, FileCheck } from "lucide-react";
 
 interface ChatSuggestionsProps {
   onSelect: (prompt: string) => void;
   disabled?: boolean;
 }
 
+// Mirrors the 3 causales from CausalesSection so the quick actions match what the
+// visitor is already looking at on screen, instead of generic FAQ-style prompts.
 const SUGGESTIONS = [
   {
-    icon: Clock,
-    label: "¿Cuánto tarda?",
-    prompt: "¿Cuánto tiempo tarda la resolución del trámite?",
+    icon: PlusCircle,
+    label: "Tuve una enfermedad",
+    prompt: "Tuve una enfermedad o accidente y no pude renovar mi licencia a tiempo, ¿califico para la exoneración?",
   },
   {
-    icon: Users,
-    label: "¿Familiar?",
-    prompt: "¿Puede un familiar llevar mis papeles si no puedo viajar a la capital?",
+    icon: Plane,
+    label: "Estuve fuera del país",
+    prompt: "Estuve fuera del país cuando venció mi licencia, ¿qué documentos necesito para la exoneración?",
   },
   {
-    icon: MapPin,
-    label: "Sede Central",
-    prompt: "¿Dónde queda la ventanilla de Asuntos Jurídicos y cuáles son sus horarios?",
+    icon: Lock,
+    label: "Estuve privado de libertad",
+    prompt: "Estuve privado de libertad cuando venció mi licencia, ¿aplico para la exoneración?",
   },
   {
     icon: FileCheck,
-    label: "Requisitos",
-    prompt: "¿Cuáles son los 3 documentos obligatorios para solicitar la exoneración?",
+    label: "¿Cómo empiezo?",
+    prompt: "¿Cuáles son los pasos y documentos para solicitar la exoneración?",
   },
 ];
 
