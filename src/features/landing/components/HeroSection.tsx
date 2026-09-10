@@ -74,9 +74,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           variants={textItem}
           className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-4 leading-relaxed font-normal"
         >
-          Averigua en <strong className="font-semibold text-slate-900">4 preguntas rápidas</strong> si tu caso
+          Averigua en <strong className="font-semibold text-slate-900">en menos de 2 minutos</strong> si tu caso
           califica por ley, la casilla exacta a marcar en el{" "}
-          <strong className="font-semibold text-slate-900">Formulario DT-AJ-001</strong> y los únicos 3 documentos
+          <strong className="font-semibold text-slate-900">Formulario DT-AJ-001</strong> y los documentos
           que necesitas llevar a ventanilla.
         </motion.p>
 

@@ -73,7 +73,7 @@ export const LandingContainer: React.FC = () => {
           onOpenSolicitud={openSolicitud}
           onOpenChat={() => setIsChatOpen(true)}
         />
-        <div ref={chatSectionAnchorRef}>
+        <div ref={chatSectionAnchorRef} className="scroll-mt-20">
           <ChatEmbeddedSection
             messages={messages}
             inputText={inputText}
