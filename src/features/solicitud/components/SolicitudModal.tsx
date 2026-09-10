@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/input";
 import { FormTextarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { FormSelect } from "@/components/ui/select";
 import {
   FileText,
@@ -47,6 +48,32 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
     comprobante: null as CausalTipo | null,
   });
 
+  const motivos = [
+    {
+      id: "24",
+      titulo: "Estar fuera del país",
+      descripcion: "Haberse encontrado fuera de Guatemala al momento en que caducó la licencia.",
+      requisito: "Constancia de movimiento migratorio.",
+      variant: "blue",
+    },
+    {
+      id: "25",
+      titulo: "Enfermedad",
+      descripcion: "Hospitalización, reposo prescrito o impedimento físico.",
+      requisito: "Constancia de consulta médica por colegiado activo.",
+      variant: "green",
+    },
+    {
+      id: "26",
+      titulo: "Prisión",
+      descripcion: "Prisión preventiva o cumplimiento de condena penal.",
+      requisito: "Constancia de estadía en prisión.",
+      variant: "purple",
+    },
+  ] as const;
+
+  const stepTitles = ["Información personal", "Información de tercero", "Información adicional", "Número de trámite solicitado", "Documentos"];
+
   return (
     <Modal
       isOpen={isOpen}
@@ -57,14 +84,15 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
       {/* Progress Bar */}
       {currentStep <= 5 && (
         <div className="mb-6">
-          <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-500 mb-2 sm:grid-cols-5">
-            {["Información personal", "Información de tercero", "Información adicional", "Número de trámite solicitado", "Documentos"].map((label, index) => (
+          <div className="grid grid-cols-5 gap-4 text-center text-sm font-semibold text-slate-500 mb-3">
+            {stepTitles.map((label, index) => (
               <span
                 key={label}
+                aria-label={`Paso ${index + 1}: ${label}`}
                 aria-current={currentStep === index + 1 ? "step" : undefined}
                 className={currentStep >= index + 1 ? "text-blue-600 font-bold" : ""}
               >
-                {index + 1}. {label}
+                {index + 1}
               </span>
             ))}
           </div>
@@ -74,6 +102,9 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               style={{ width: `${(currentStep / 5) * 100}%` }}
             />
           </div>
+          <h3 className="mt-4 text-center text-base font-semibold" aria-live="polite">
+            {stepTitles[currentStep - 1]}
+          </h3>
         </div>
       )}
 
@@ -370,16 +401,34 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             nextStep();
           }}
         >
-          <FormSelect
-            label="Número de trámite solicitado"
-            value={formData.causal}
-            onChange={(event) => updateField("causal", event.target.value as CausalTipo)}
-            required
-          >
-            <option value="24">24 - Fuera del país</option>
-            <option value="25">25 - Enfermedad</option>
-            <option value="26">26 - Prisión</option>
-          </FormSelect>
+          <fieldset className="space-y-3">
+            <legend className="mb-2 text-sm font-semibold">
+              Motivo del trámite <span className="text-red-600" aria-hidden="true">*</span>
+            </legend>
+            {motivos.map((motivo) => (
+              <label key={motivo.id} className="block cursor-pointer">
+                <input
+                  type="radio"
+                  name="motivo-tramite"
+                  value={motivo.id}
+                  checked={formData.causal === motivo.id}
+                  onChange={() => updateField("causal", motivo.id)}
+                  className="peer sr-only"
+                  required
+                />
+                <span className="block rounded-xl border-2 border-slate-200 bg-white p-4 transition-all hover:border-slate-300 peer-checked:border-blue-600 peer-checked:bg-blue-50/50 peer-checked:shadow-xs peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-600">
+                  <span className="mb-1 flex items-center justify-between gap-3">
+                    <span className="text-sm font-bold text-slate-900">{motivo.titulo}</span>
+                    <Badge variant={motivo.variant}>Casilla {motivo.id}</Badge>
+                  </span>
+                  <span className="mb-2 block text-xs text-slate-600">{motivo.descripcion}</span>
+                  <span className="block text-[11px] font-medium text-blue-800">
+                    Requisito: {motivo.requisito}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
 
           <div className="border-t pt-6">
             <FormTextarea
