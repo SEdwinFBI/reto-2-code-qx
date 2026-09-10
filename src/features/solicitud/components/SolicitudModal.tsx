@@ -43,9 +43,8 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
   result,
 }) => {
   const [fileSimulations, setFileSimulations] = useState({
-    formulario: false,
     dpi: false,
-    comprobante: false,
+    comprobante: null as CausalTipo | null,
   });
 
   return (
@@ -412,50 +411,17 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
       {currentStep === 5 && (
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            Adjunta tus 3 requisitos digitales en formato PDF o imagen legible:
+            Adjunta los 2 documentos requeridos en formato PDF o imagen legible:
           </p>
 
           <div className="space-y-3">
-            {/* Requisito 1 */}
+            {/* DPI requerido para todos los trámites */}
             <div className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-blue-600 shrink-0" />
                 <div>
                   <h5 className="text-xs font-bold text-slate-900">
-                    1. Formulario DT-AJ-001 firmado
-                  </h5>
-                  <p className="text-[11px] text-slate-500">
-                    Marca la Casilla {formData.causal} y firma idéntica al DPI.
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant={fileSimulations.formulario ? "secondary" : "outline"}
-                size="sm"
-                type="button"
-                onClick={() =>
-                  setFileSimulations((p) => ({ ...p, formulario: !p.formulario }))
-                }
-              >
-                {fileSimulations.formulario ? (
-                  <span className="flex items-center gap-1 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Upload className="w-3.5 h-3.5" /> Subir
-                  </span>
-                )}
-              </Button>
-            </div>
-
-            {/* Requisito 2 */}
-            <div className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-blue-600 shrink-0" />
-                <div>
-                  <h5 className="text-xs font-bold text-slate-900">
-                    2. Fotocopia de DPI de ambos lados
+                    1. Fotocopia de DPI de ambos lados
                   </h5>
                   <p className="text-[11px] text-slate-500">
                     Vigente y completamente legible.
@@ -480,30 +446,32 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               </Button>
             </div>
 
-            {/* Requisito 3 */}
+            {/* Constancia correspondiente al trámite */}
             <div className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-blue-600 shrink-0" />
                 <div>
                   <h5 className="text-xs font-bold text-slate-900">
-                    3. Comprobante oficial de fechas
+                    2. {formData.causal === "26"
+                      ? "Constancia de estadía en prisión"
+                      : formData.causal === "25"
+                        ? "Constancia de consulta médica por colegiado activo"
+                        : "Constancia de movimiento migratorio"}
                   </h5>
                   <p className="text-[11px] text-slate-500">
-                    {formData.causal === "25" && "Certificado médico del IGSS o médico colegiado."}
-                    {formData.causal === "24" && "Movimiento migratorio oficial o pasaporte sellado."}
-                    {formData.causal === "26" && "Constancia del Sistema Penitenciario o juzgado."}
+                    Adjunta una copia completamente legible.
                   </p>
                 </div>
               </div>
               <Button
-                variant={fileSimulations.comprobante ? "secondary" : "outline"}
+                variant={fileSimulations.comprobante === formData.causal ? "secondary" : "outline"}
                 size="sm"
                 type="button"
                 onClick={() =>
-                  setFileSimulations((p) => ({ ...p, comprobante: !p.comprobante }))
+                  setFileSimulations((p) => ({ ...p, comprobante: p.comprobante === formData.causal ? null : formData.causal }))
                 }
               >
-                {fileSimulations.comprobante ? (
+                {fileSimulations.comprobante === formData.causal ? (
                   <span className="flex items-center gap-1 text-emerald-700">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
                   </span>
