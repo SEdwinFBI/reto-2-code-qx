@@ -1,7 +1,5 @@
 export type CausalTipo = "24" | "25" | "26";
 
-export type TipoLicencia = "A" | "B" | "C" | "M" | "E";
-
 export interface SolicitudFormData {
   tramitaTercero: boolean;
   terceroCui: string;
@@ -25,7 +23,7 @@ export interface SolicitudFormData {
   telefonoAlternativo: string;
   correo: string;
   causal: CausalTipo;
-  tipoLicencia: TipoLicencia | "";
+  numerosDocumento: string[];
   observaciones: string;
   archivoFormulario?: string;
   archivoDpi?: string;

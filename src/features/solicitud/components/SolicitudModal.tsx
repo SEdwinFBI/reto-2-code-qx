@@ -6,15 +6,15 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/input";
 import { FormTextarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { FormSelect } from "@/components/ui/select";
 import {
   FileText,
+  Plus,
   Upload,
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
-import { SolicitudFormData, SolicitudResult, CausalTipo, TipoLicencia } from "../types";
+import { SolicitudFormData, SolicitudResult, CausalTipo } from "../types";
 
 interface SolicitudModalProps {
   isOpen: boolean;
@@ -194,17 +194,60 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             if (formData.nombres) nextStep();
           }}
         >
-          <FormSelect
-            label="Tipo de licencia en Guatemala"
-            value={formData.tipoLicencia}
-            onChange={(event) => updateField("tipoLicencia", event.target.value as TipoLicencia | "")}
-            required
-          >
-            <option value="">Selecciona un tipo de licencia</option>
-            {(["A", "B", "C", "M", "E"] as const).map((tipo) => (
-              <option key={tipo} value={tipo}>Tipo {tipo}</option>
+          <fieldset className="space-y-4">
+            <legend className="mb-2 text-sm font-semibold">Licencias o documentos de licencia</legend>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <FileText className="size-4 text-blue-600" aria-hidden="true" />
+              <span>Puedes incluir varios en esta solicitud.</span>
+              <Badge variant="blue">
+                {formData.numerosDocumento.length} {formData.numerosDocumento.length === 1 ? "documento" : "documentos"}
+              </Badge>
+            </div>
+            {formData.numerosDocumento.map((numero, index) => (
+              <div key={index} className="grid grid-cols-[minmax(0,1fr)_5rem] items-end gap-2">
+                <div className="min-w-0">
+                  <FormInput
+                    id={`numero-documento-${index}`}
+                    label={index === 0 ? "Número de documento" : `Número de documento ${index + 1}`}
+                    type="text"
+                    value={numero}
+                    onChange={(event) => updateField(
+                      "numerosDocumento",
+                      formData.numerosDocumento.map((value, position) =>
+                        position === index ? event.target.value : value
+                      )
+                    )}
+                    required
+                    pattern=".*\S.*"
+                  />
+                </div>
+                {index > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-9 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    aria-label={`Eliminar documento ${index + 1}`}
+                    onClick={() => updateField(
+                      "numerosDocumento",
+                      formData.numerosDocumento.filter((_, position) => position !== index)
+                    )}
+                  >
+                    Eliminar
+                  </Button>
+                )}
+              </div>
             ))}
-          </FormSelect>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2"
+              aria-label="Agregar otro número de documento"
+              onClick={() => updateField("numerosDocumento", [...formData.numerosDocumento, ""])}
+            >
+              <Plus className="size-5" aria-hidden="true" />
+              Agregar otra licencia o documento
+            </Button>
+          </fieldset>
           <fieldset className="space-y-4">
             <legend className="mb-2 text-sm font-semibold">Datos de contacto</legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

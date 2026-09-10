@@ -26,7 +26,7 @@ const INITIAL_DATA: SolicitudFormData = {
   telefonoAlternativo: "",
   correo: "",
   causal: "25",
-  tipoLicencia: "",
+  numerosDocumento: [""],
   observaciones: "",
 };
 
