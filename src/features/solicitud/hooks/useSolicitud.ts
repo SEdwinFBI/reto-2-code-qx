@@ -5,6 +5,11 @@ import { SolicitudFormData, SolicitudResult } from "../types";
 
 const INITIAL_DATA: SolicitudFormData = {
   cui: "",
+  fechaNacimiento: "",
+  serie: "",
+  nacionalidad: "",
+  numeroLicencia: "",
+  paisEmisionLicencia: "",
   nombres: "",
   apellidos: "",
   telefono: "",
@@ -33,7 +38,26 @@ export function useSolicitud() {
   };
 
   const updateField = (field: keyof SolicitudFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      ...(["cui", "fechaNacimiento", "serie"].includes(field)
+        ? { nombres: "", apellidos: "", nacionalidad: "", numeroLicencia: "", paisEmisionLicencia: "" }
+        : {}),
+      [field]: value,
+    }));
+  };
+
+  const consultarPersona = () => {
+    // Consulta de demostración, al igual que el envío actual del formulario.
+    // Sustituir estos datos cuando se conecte el servicio de identidad.
+    setFormData((prev) => ({
+      ...prev,
+      nombres: "Persona",
+      apellidos: "de demostración",
+      nacionalidad: "Guatemalteca",
+      numeroLicencia: "0000000000000",
+      paisEmisionLicencia: "Guatemala",
+    }));
   };
 
   const nextStep = () => {
@@ -78,6 +102,7 @@ export function useSolicitud() {
     currentStep,
     formData,
     updateField,
+    consultarPersona,
     nextStep,
     prevStep,
     submitSolicitud,

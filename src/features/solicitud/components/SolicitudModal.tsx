@@ -9,10 +9,6 @@ import {
   FileText,
   Upload,
   CheckCircle2,
-  Shield,
-  Calendar,
-  AlertCircle,
-  Clock,
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
@@ -24,6 +20,7 @@ interface SolicitudModalProps {
   currentStep: number;
   formData: SolicitudFormData;
   updateField: (field: keyof SolicitudFormData, value: string) => void;
+  onConsultarPersona: () => void;
   nextStep: () => void;
   prevStep: () => void;
   onSubmit: () => void;
@@ -37,6 +34,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
   currentStep,
   formData,
   updateField,
+  onConsultarPersona,
   nextStep,
   prevStep,
   onSubmit,
@@ -95,7 +93,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
         <div className="mb-6">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
             <span className={currentStep >= 1 ? "text-blue-600 font-bold" : ""}>
-              1. Datos del Solicitante
+              1. Información personal
             </span>
             <span className={currentStep >= 2 ? "text-blue-600 font-bold" : ""}>
               2. Causal Legal
@@ -115,69 +113,91 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
 
       {/* Step 1: Datos Personales */}
       {currentStep === 1 && (
-        <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 flex items-start gap-3">
-            <Shield className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-900 leading-relaxed">
-              Ingresa tus datos conforme a tu Documento Personal de Identificación (DPI).
-              Este trámite es gratuito según Acuerdo Gubernativo 59-2012.
+        <form
+          className="space-y-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onConsultarPersona();
+          }}
+        >
+          <fieldset className="space-y-4">
+            <legend className="mb-2 text-sm font-semibold">Información personal</legend>
+            <p className="text-sm text-muted-foreground">
+              Completa los tres campos obligatorios y pulsa Consultar.
             </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+              <FormInput
+                label="CUI (13 dígitos)"
+                inputMode="numeric"
+                pattern="[0-9]{13}"
+                maxLength={13}
+                value={formData.cui}
+                onChange={(e) => updateField("cui", e.target.value)}
+                required
+              />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="CUI / DPI (13 dígitos)"
-              placeholder="Ej: 2450 12345 0101"
-              value={formData.cui}
-              onChange={(e) => updateField("cui", e.target.value)}
-              required
-            />
-            <FormInput
-              label="Teléfono de Contacto"
-              placeholder="Ej: 5555 4433"
-              value={formData.telefono}
-              onChange={(e) => updateField("telefono", e.target.value)}
-              required
-            />
+              <FormInput
+                label="Fecha de nacimiento"
+                type="date"
+                value={formData.fechaNacimiento}
+                onChange={(e) => updateField("fechaNacimiento", e.target.value)}
+                required
+              />
+              <FormInput
+                label="Últimos 4 dígitos de serie"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{4}"
+                maxLength={4}
+                value={formData.serie}
+                onChange={(e) => updateField("serie", e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Consulta de demostración: se rellenarán datos ficticios.
+              </p>
+              <Button type="submit">Consultar</Button>
+            </div>
+          </fieldset>
+          <fieldset className="space-y-4">
+            <legend className="mb-2 text-sm font-semibold">Datos consultados</legend>
+            <p className="text-sm text-muted-foreground">
+              Se completarán al consultar. Solo puedes editar el número de licencia.
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+              <FormInput
+                label="Nombre completo"
+                value={[formData.nombres, formData.apellidos].filter(Boolean).join(" ")}
+                readOnly
+              />
+              </div>
+              <FormInput label="Nacionalidad" value={formData.nacionalidad} readOnly />
+              <FormInput
+                label="No. de licencia"
+                value={formData.numeroLicencia}
+                onChange={(e) => updateField("numeroLicencia", e.target.value)}
+              />
+              <FormInput
+                label="País de emisión de licencia"
+                value={formData.paisEmisionLicencia}
+                readOnly
+              />
+            </div>
+          </fieldset>
+          <div className="flex justify-end border-t pt-4">
+          <Button
+            type="button"
+            onClick={nextStep}
+            disabled={!formData.nombres}
+          >
+            Continuar
+          </Button>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="Nombres Completos"
-              placeholder="Tus nombres"
-              value={formData.nombres}
-              onChange={(e) => updateField("nombres", e.target.value)}
-              required
-            />
-            <FormInput
-              label="Apellidos Completos"
-              placeholder="Tus apellidos"
-              value={formData.apellidos}
-              onChange={(e) => updateField("apellidos", e.target.value)}
-              required
-            />
-          </div>
-
-          <FormInput
-            label="Correo Electrónico"
-            type="email"
-            placeholder="nombre@ejemplo.com"
-            value={formData.correo}
-            onChange={(e) => updateField("correo", e.target.value)}
-            helperText="Aquí recibirás la notificación de resolución oficial."
-          />
-
-          <div className="flex justify-end pt-4">
-            <Button
-              type="button"
-              onClick={nextStep}
-              disabled={!formData.cui || !formData.nombres}
-              className="gap-2"
-            >
-              Continuar <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+        </form>
       )}
 
       {/* Step 2: Causal Legal */}

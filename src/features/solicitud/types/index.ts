@@ -2,6 +2,11 @@ export type CausalTipo = "24" | "25" | "26";
 
 export interface SolicitudFormData {
   cui: string;
+  fechaNacimiento: string;
+  serie: string;
+  nacionalidad: string;
+  numeroLicencia: string;
+  paisEmisionLicencia: string;
   nombres: string;
   apellidos: string;
   telefono: string;
