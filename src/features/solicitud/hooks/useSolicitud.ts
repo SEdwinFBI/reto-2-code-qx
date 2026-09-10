@@ -4,6 +4,16 @@ import { useState } from "react";
 import { SolicitudFormData, SolicitudResult } from "../types";
 
 const INITIAL_DATA: SolicitudFormData = {
+  tramitaTercero: false,
+  terceroCui: "",
+  terceroNombreCompleto: "",
+  terceroParentesco: "",
+  terceroCorreo: "",
+  terceroTelefono: "",
+  esTrabajadorPublico: false,
+  solicitaAbogado: false,
+  institucionYPuesto: "",
+  numeroColegiadoActivo: "",
   cui: "",
   fechaNacimiento: "",
   serie: "",
@@ -13,10 +23,10 @@ const INITIAL_DATA: SolicitudFormData = {
   nombres: "",
   apellidos: "",
   telefono: "",
+  telefonoAlternativo: "",
   correo: "",
   causal: "25",
-  fechaVencimiento: "",
-  fechaHecho: "",
+  tipoLicencia: "",
   observaciones: "",
 };
 
@@ -37,7 +47,7 @@ export function useSolicitud() {
     setIsOpen(false);
   };
 
-  const updateField = (field: keyof SolicitudFormData, value: string) => {
+  const updateField = <K extends keyof SolicitudFormData>(field: K, value: SolicitudFormData[K]) => {
     setFormData((prev) => ({
       ...prev,
       ...(["cui", "fechaNacimiento", "serie"].includes(field)
@@ -61,7 +71,7 @@ export function useSolicitud() {
   };
 
   const nextStep = () => {
-    setCurrentStep((prev) => Math.min(prev + 1, 4));
+    setCurrentStep((prev) => Math.min(prev + 1, 6));
   };
 
   const prevStep = () => {
@@ -91,7 +101,7 @@ export function useSolicitud() {
       causalNombre: causalMap[formData.causal] || "Causal de Fuerza Mayor",
     });
 
-    setCurrentStep(4);
+    setCurrentStep(6);
     setIsSubmitting(false);
   };
 

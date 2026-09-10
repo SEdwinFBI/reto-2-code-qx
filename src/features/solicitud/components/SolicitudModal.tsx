@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { FormTextarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/ui/select";
 import {
   FileText,
   Upload,
@@ -12,14 +13,14 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
-import { SolicitudFormData, SolicitudResult, CausalTipo } from "../types";
+import { SolicitudFormData, SolicitudResult, CausalTipo, TipoLicencia } from "../types";
 
 interface SolicitudModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentStep: number;
   formData: SolicitudFormData;
-  updateField: (field: keyof SolicitudFormData, value: string) => void;
+  updateField: <K extends keyof SolicitudFormData>(field: K, value: SolicitudFormData[K]) => void;
   onConsultarPersona: () => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -47,40 +48,6 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
     comprobante: false,
   });
 
-  const causalesList: {
-    id: CausalTipo;
-    casilla: string;
-    titulo: string;
-    descripcion: string;
-    requisito: string;
-    gae: string;
-  }[] = [
-    {
-      id: "25",
-      casilla: "Casilla 25",
-      titulo: "Enfermedad o Accidente",
-      descripcion: "Hospitalización, reposo prescrito o impedimento físico.",
-      requisito: "Certificación médica original del IGSS, red pública o colegiado activo.",
-      gae: "3112",
-    },
-    {
-      id: "24",
-      casilla: "Casilla 24",
-      titulo: "Estar Fuera del País",
-      descripcion: "Haberse encontrado fuera de Guatemala al momento en que caducó la licencia.",
-      requisito: "Certificación de Movimiento Migratorio (IGM) o pasaporte con sellos.",
-      gae: "3111",
-    },
-    {
-      id: "26",
-      casilla: "Casilla 26",
-      titulo: "Privado de Libertad",
-      descripcion: "Prisión preventiva o cumplimiento de condena penal.",
-      requisito: "Certificación de la Dirección General del Sistema Penitenciario.",
-      gae: "3113",
-    },
-  ];
-
   return (
     <Modal
       isOpen={isOpen}
@@ -89,23 +56,23 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
       className="sm:max-w-2xl"
     >
       {/* Progress Bar */}
-      {currentStep <= 3 && (
+      {currentStep <= 5 && (
         <div className="mb-6">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
-            <span className={currentStep >= 1 ? "text-blue-600 font-bold" : ""}>
-              1. Información personal
-            </span>
-            <span className={currentStep >= 2 ? "text-blue-600 font-bold" : ""}>
-              2. Causal Legal
-            </span>
-            <span className={currentStep >= 3 ? "text-blue-600 font-bold" : ""}>
-              3. Documentos
-            </span>
+          <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-500 mb-2 sm:grid-cols-5">
+            {["Información personal", "Información de tercero", "Información adicional", "Número de trámite solicitado", "Documentos"].map((label, index) => (
+              <span
+                key={label}
+                aria-current={currentStep === index + 1 ? "step" : undefined}
+                className={currentStep >= index + 1 ? "text-blue-600 font-bold" : ""}
+              >
+                {index + 1}. {label}
+              </span>
+            ))}
           </div>
           <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-600 transition-all duration-300 rounded-full"
-              style={{ width: `${(currentStep / 3) * 100}%` }}
+              style={{ width: `${(currentStep / 5) * 100}%` }}
             />
           </div>
         </div>
@@ -113,6 +80,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
 
       {/* Step 1: Datos Personales */}
       {currentStep === 1 && (
+        <div className="space-y-6">
         <form
           className="space-y-6"
           onSubmit={(event) => {
@@ -188,11 +156,138 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               />
             </div>
           </fieldset>
+        </form>
+        <form
+          className="space-y-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (formData.nombres) nextStep();
+          }}
+        >
+          <FormSelect
+            label="Tipo de licencia en Guatemala"
+            value={formData.tipoLicencia}
+            onChange={(event) => updateField("tipoLicencia", event.target.value as TipoLicencia | "")}
+            required
+          >
+            <option value="">Selecciona un tipo de licencia</option>
+            {(["A", "B", "C", "M", "E"] as const).map((tipo) => (
+              <option key={tipo} value={tipo}>Tipo {tipo}</option>
+            ))}
+          </FormSelect>
+          <fieldset className="space-y-4">
+            <legend className="mb-2 text-sm font-semibold">Datos de contacto</legend>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <FormInput
+                  id="solicitante-correo"
+                  label="Correo electrónico"
+                  type="email"
+                  value={formData.correo}
+                  onChange={(event) => updateField("correo", event.target.value)}
+                />
+              </div>
+              <FormInput
+                id="solicitante-telefono"
+                label="Número de teléfono"
+                type="tel"
+                value={formData.telefono}
+                onChange={(event) => updateField("telefono", event.target.value)}
+              />
+              <FormInput
+                id="solicitante-telefono-alternativo"
+                label="Teléfono alternativo"
+                type="tel"
+                value={formData.telefonoAlternativo}
+                onChange={(event) => updateField("telefonoAlternativo", event.target.value)}
+              />
+            </div>
+          </fieldset>
           <div className="flex justify-end border-t pt-4">
+            <Button type="submit" disabled={!formData.nombres}>Continuar</Button>
+          </div>
+        </form>
+        </div>
+      )}
+
+      {/* Step 2: Información de tercero */}
+      {currentStep === 2 && (
+        <form
+          className="space-y-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            nextStep();
+          }}
+        >
+          <fieldset className="space-y-4">
+            <legend className="mb-2 text-sm font-semibold">Información de tercero</legend>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.tramitaTercero}
+                onChange={(event) => updateField("tramitaTercero", event.target.checked)}
+                aria-controls="datos-tercero"
+                aria-expanded={formData.tramitaTercero}
+              />
+              Un tercero está realizando el trámite
+            </label>
+            {formData.tramitaTercero && (
+              <div id="datos-tercero" className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Completa todos los datos de la persona que realiza el trámite.
+                </p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormInput
+                    id="tercero-cui"
+                    label="CUI (13 dígitos)"
+                    inputMode="numeric"
+                    pattern="[0-9]{13}"
+                    maxLength={13}
+                    value={formData.terceroCui}
+                    onChange={(event) => updateField("terceroCui", event.target.value)}
+                    required
+                  />
+                  <FormInput
+                    id="tercero-nombre"
+                    label="Nombre completo"
+                    pattern=".*\S.*"
+                    value={formData.terceroNombreCompleto}
+                    onChange={(event) => updateField("terceroNombreCompleto", event.target.value)}
+                    required
+                  />
+                  <FormInput
+                    label="Parentesco"
+                    pattern=".*\S.*"
+                    value={formData.terceroParentesco}
+                    onChange={(event) => updateField("terceroParentesco", event.target.value)}
+                    required
+                  />
+                  <FormInput
+                    label="Correo electrónico"
+                    type="email"
+                    value={formData.terceroCorreo}
+                    onChange={(event) => updateField("terceroCorreo", event.target.value)}
+                    required
+                  />
+                  <FormInput
+                    label="No. de teléfono"
+                    type="tel"
+                    pattern=".*[0-9].*"
+                    value={formData.terceroTelefono}
+                    onChange={(event) => updateField("terceroTelefono", event.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+          </fieldset>
+
+          <div className="flex items-center justify-between border-t pt-4">
+          <Button variant="ghost" type="button" onClick={prevStep}>
+            Regresar
+          </Button>
           <Button
-            type="button"
-            onClick={nextStep}
-            disabled={!formData.nombres}
+            type="submit"
           >
             Continuar
           </Button>
@@ -200,53 +295,105 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
         </form>
       )}
 
-      {/* Step 2: Causal Legal */}
-      {currentStep === 2 && (
-        <div className="space-y-4">
-          <p className="text-sm text-slate-600">
-            Selecciona la causal por la cual no pudiste renovar tu licencia dentro de la fecha legal:
-          </p>
-
-          <div className="space-y-3">
-            {causalesList.map((c) => {
-              const isSelected = formData.causal === c.id;
-              return (
-                <div
-                  key={c.id}
-                  onClick={() => updateField("causal", c.id)}
-                  className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                    isSelected
-                      ? "border-blue-600 bg-blue-50/50 shadow-xs"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-bold text-slate-900">{c.titulo}</span>
-                    <Badge variant={c.id === "25" ? "green" : c.id === "24" ? "blue" : "purple"}>
-                      {c.casilla}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-slate-600 mb-2">{c.descripcion}</p>
-                  <p className="text-[11px] text-blue-800 font-medium">
-                    Requisito: {c.requisito}
-                  </p>
-                </div>
-              );
-            })}
+      {/* Step 3: Información adicional */}
+      {currentStep === 3 && (
+        <form
+          className="space-y-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            nextStep();
+          }}
+        >
+          <fieldset className="space-y-4">
+            <legend className="text-sm font-semibold">Información adicional</legend>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.esTrabajadorPublico}
+                onChange={(event) => updateField("esTrabajadorPublico", event.target.checked)}
+                aria-controls="datos-trabajador-publico"
+                aria-expanded={formData.esTrabajadorPublico}
+              />
+              Es funcionario o empleado público
+            </label>
+            {formData.esTrabajadorPublico && (
+              <div id="datos-trabajador-publico">
+                <FormInput
+                  id="institucion-puesto"
+                  label="Institución y puesto que ocupa"
+                  type="text"
+                  pattern=".*\S.*"
+                  required
+                  value={formData.institucionYPuesto}
+                  onChange={(event) => updateField("institucionYPuesto", event.target.value)}
+                />
+              </div>
+            )}
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.solicitaAbogado}
+                onChange={(event) => updateField("solicitaAbogado", event.target.checked)}
+                aria-controls="datos-abogado"
+                aria-expanded={formData.solicitaAbogado}
+              />
+              La solicitud se realiza por parte de un abogado
+            </label>
+            {formData.solicitaAbogado && (
+              <div id="datos-abogado">
+                <FormInput
+                  id="numero-colegiado-activo"
+                  label="No. de colegiado activo"
+                  type="text"
+                  pattern=".*\S.*"
+                  required
+                  value={formData.numeroColegiadoActivo}
+                  onChange={(event) => updateField("numeroColegiadoActivo", event.target.value)}
+                />
+              </div>
+            )}
+          </fieldset>
+          <div className="flex items-center justify-between border-t pt-4">
+            <Button variant="ghost" type="button" onClick={prevStep}>
+              Regresar
+            </Button>
+            <Button type="submit">Continuar</Button>
           </div>
+        </form>
+      )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <FormInput
-              label="Fecha en que venció tu licencia"
-              type="date"
-              value={formData.fechaVencimiento}
-              onChange={(e) => updateField("fechaVencimiento", e.target.value)}
-            />
-            <FormInput
-              label="Fecha del impedimento o retorno"
-              type="date"
-              value={formData.fechaHecho}
-              onChange={(e) => updateField("fechaHecho", e.target.value)}
+      {/* Step 4: Número de trámite solicitado */}
+      {currentStep === 4 && (
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            nextStep();
+          }}
+        >
+          <FormSelect
+            label="Número de trámite solicitado"
+            value={formData.causal}
+            onChange={(event) => updateField("causal", event.target.value as CausalTipo)}
+            required
+          >
+            <option value="24">24 - Fuera del país</option>
+            <option value="25">25 - Enfermedad</option>
+            <option value="26">26 - Prisión</option>
+          </FormSelect>
+
+          <div className="border-t pt-6">
+            <FormTextarea
+              label="Favor llenar un breve resumen de su solicitud"
+              rows={4}
+              required
+              value={formData.observaciones}
+              onChange={(event) => {
+                event.target.setCustomValidity(
+                  event.target.value.trim() ? "" : "Escribe un breve resumen de tu solicitud."
+                );
+                updateField("observaciones", event.target.value);
+              }}
             />
           </div>
 
@@ -254,15 +401,15 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             <Button variant="ghost" type="button" onClick={prevStep} className="gap-2">
               <ArrowLeft className="w-4 h-4" /> Regresar
             </Button>
-            <Button type="button" onClick={nextStep} className="gap-2">
+            <Button type="submit" className="gap-2">
               Continuar a Requisitos <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
-        </div>
+        </form>
       )}
 
-      {/* Step 3: Requisitos Digitales */}
-      {currentStep === 3 && (
+      {/* Step 5: Requisitos Digitales */}
+      {currentStep === 5 && (
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
             Adjunta tus 3 requisitos digitales en formato PDF o imagen legible:
@@ -385,8 +532,8 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
         </div>
       )}
 
-      {/* Step 4: Solicitud Radicada con Éxito */}
-      {currentStep === 4 && result && (
+      {/* Step 6: Solicitud Radicada con Éxito */}
+      {currentStep === 6 && result && (
         <div className="text-center py-4 space-y-4">
           <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-8 h-8" />
