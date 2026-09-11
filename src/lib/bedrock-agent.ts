@@ -1,8 +1,9 @@
 import { BedrockAgentCoreClient, InvokeHarnessCommand } from "@aws-sdk/client-bedrock-agentcore";
 
-const region = process.env.AWS_REGION || "us-east-1";
-const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+const region = process.env.BEDROCK_REGION || process.env.AWS_REGION || "us-east-1";
+const accessKeyId = process.env.ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
 
 export const bedrockClient = new BedrockAgentCoreClient({
   region,
