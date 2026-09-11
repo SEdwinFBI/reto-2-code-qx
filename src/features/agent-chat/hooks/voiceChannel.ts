@@ -1,11 +1,4 @@
-/**
- * Keeps voice input (speech-to-text) and voice output (text-to-speech) mutually
- * exclusive across the whole app: starting one stops the other. Plain
- * module-level state on purpose — `useSpeechRecognition` and `useSpeechSynthesis`
- * are each instantiated multiple times (one recognizer per chat surface, one
- * synthesizer per message bubble), so this needs to be shared outside React's
- * tree rather than passed down as props.
- */
+// Coordinación global de exclusión mutua entre micrófono y lectura por voz.
 let activeMicStop: (() => void) | null = null;
 
 export function registerActiveMic(stopFn: (() => void) | null): void {

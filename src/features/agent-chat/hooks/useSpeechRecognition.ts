@@ -42,15 +42,9 @@ interface UseSpeechRecognitionOptions {
   lang?: string;
 }
 
-/**
- * Wraps the browser's Web Speech API for voice-to-text dictation into the chat
- * input. Runs in continuous mode with interim results, so it keeps listening
- * (and keeps updating the input live) through natural pauses instead of
- * closing after the first thing said — only a manual stop (or unmount) ends it.
- */
+// Maneja el reconocimiento de voz continuo mediante Web Speech API.
 export function useSpeechRecognition({ onResult, lang = "es-GT" }: UseSpeechRecognitionOptions) {
-  // Always false on the server/first paint so SSR and the pre-hydration DOM match;
-  // flipped after mount once we can actually check for browser support.
+  // Estado inicial seguro para SSR.
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<MinimalSpeechRecognition | null>(null);
@@ -60,9 +54,7 @@ export function useSpeechRecognition({ onResult, lang = "es-GT" }: UseSpeechReco
     onResultRef.current = onResult;
   }, [onResult]);
 
-  // Browser capability detection depends on `window`, which only exists after
-  // mount, so setting state here is unavoidable — there is no SSR-safe,
-  // render-time alternative for this check.
+  // Detección de soporte en cliente tras el montaje.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const Ctor = getSpeechRecognitionConstructor();
@@ -112,15 +104,14 @@ export function useSpeechRecognition({ onResult, lang = "es-GT" }: UseSpeechReco
 
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening) return;
-    // Voice input and voice output are mutually exclusive — starting the mic
-    // stops any reply currently being read aloud.
+    // Detiene la reproducción de voz antes de activar el micrófono.
     stopActiveSpeech();
     try {
       recognitionRef.current.start();
       setIsListening(true);
       registerActiveMic(stopListening);
     } catch {
-      // Recognition was already running — ignore.
+      // Ignora si ya estaba iniciado.
     }
   }, [isListening, stopListening]);
 

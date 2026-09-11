@@ -6,8 +6,7 @@ interface ChatSuggestionsProps {
   disabled?: boolean;
 }
 
-// Mirrors the 3 causales from CausalesSection so the quick actions match what the
-// visitor is already looking at on screen, instead of generic FAQ-style prompts.
+// Sugerencias basadas en las causales de exoneración.
 const SUGGESTIONS = [
   {
     icon: PlusCircle,

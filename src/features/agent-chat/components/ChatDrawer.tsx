@@ -64,14 +64,14 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-      {/* Semi-transparent Backdrop for centered modal */}
+      {/* Fondo con desenfoque */}
       <div
         className="fixed inset-0 bg-navy-950/60 backdrop-blur-xs transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Centered Chat Window Container */}
+      {/* Contenedor del modal */}
       <div
         className="relative z-10 w-full max-w-xl h-[min(680px,90dvh)]
           bg-white rounded-2xl shadow-2xl border border-slate-200/90
@@ -80,14 +80,13 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         aria-modal="true"
         aria-labelledby="chat-title"
       >
-        {/* Chat Header */}
+        {/* Cabecera */}
         <div className="bg-navy-900 text-white px-5 py-4 flex items-center justify-between shadow-xs shrink-0 border-b border-navy-800">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gold-500/50 shadow-inner">
                 <Image src="/images.jpg" alt="Escudo Nacional de Guatemala" fill sizes="40px" className="object-cover" />
               </div>
-              {/* Online green indicator */}
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-navy-900 rounded-full" />
             </div>
             <div>
@@ -123,7 +122,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           </div>
         </div>
 
-        {/* Messages Scroll Area - Centered flow */}
+        {/* Mensajes */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 bg-[#fbfcfe] space-y-3">
           {messages.map((msg) => (
             <ChatMessageItem key={msg.id} message={msg} />
@@ -131,7 +130,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Suggestion Chips */}
+        {/* Sugerencias */}
         <div className="px-4 sm:px-6 py-1 border-t border-slate-100 bg-white shrink-0">
           <ChatSuggestions
             disabled={isLoading}
@@ -139,7 +138,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           />
         </div>
 
-        {/* Input Bar */}
+        {/* Entrada de texto */}
         <form
           onSubmit={handleSubmit}
           className="p-3 sm:p-4 bg-white border-t border-slate-100 flex items-center gap-2.5 shrink-0"

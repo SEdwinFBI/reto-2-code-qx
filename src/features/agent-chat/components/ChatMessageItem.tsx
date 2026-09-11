@@ -7,27 +7,19 @@ import { ChatMessage } from "../types";
 import { cn } from "@/lib/utils";
 import { useSpeechSynthesis } from "../hooks/useSpeechSynthesis";
 
-/**
- * The agent replies using WhatsApp-style single-asterisk emphasis (*texto*) to mean
- * bold, not the italic that CommonMark assigns to it. Upgrading lone *..* runs to
- * **..** lets remark render them as <strong>, matching what the agent intends.
- * Left untouched if the text already uses real **bold** markers.
- */
+// Convierte asteriscos simples (*texto*) a negritas (**texto**) estilo WhatsApp.
 function normalizeAgentMarkdown(text: string): string {
   return text.replace(/(^|[^*])\*(?!\*)([^*\n]+?)\*(?!\*)/g, "$1**$2**");
 }
 
-/**
- * The Bedrock agent occasionally leaks raw tool-call control tokens into the
- * visible reply text. Strip known artifacts here so they never reach the user.
- */
+// Elimina tokens de control de Bedrock del texto visible.
 const ARTIFACT_PATTERNS = ["<｜DSML｜function_calls"];
 
 function stripKnownArtifacts(text: string): string {
   return ARTIFACT_PATTERNS.reduce((acc, pattern) => acc.split(pattern).join(""), text);
 }
 
-/** Reduces the agent's markdown reply to plain, speakable text for the "listen" button. */
+// Limpia el formato markdown para lectura por voz (TTS).
 function stripMarkdownForSpeech(text: string): string {
   return text
     .replace(/\*\*?([^*\n]+?)\*\*?/g, "$1")
@@ -45,8 +37,7 @@ interface MarkdownBoundaryState {
   hasError: boolean;
 }
 
-// Streamed, partially-formed markdown should never take the chat down — if parsing
-// ever throws, fall back to the raw text so the reply still reaches the user.
+// Captura errores de parseo markdown para mostrar texto plano como respaldo.
 class MarkdownBoundary extends React.Component<
   { fallback: string; children: React.ReactNode },
   MarkdownBoundaryState

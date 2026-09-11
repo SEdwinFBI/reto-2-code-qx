@@ -30,7 +30,7 @@ export async function sendMessageToAgent(
     throw new Error(await readErrorMessage(response));
   }
 
-  // Handle streaming response if available
+  // Procesa la respuesta por streaming si está disponible
   if (response.body && onChunk) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -57,6 +57,6 @@ export async function sendMessageToAgent(
     return accumulated;
   }
 
-  // Fallback to text
+  // Respaldo en texto plano
   return await response.text();
 }

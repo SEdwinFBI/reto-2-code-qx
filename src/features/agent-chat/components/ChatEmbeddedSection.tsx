@@ -20,10 +20,9 @@ interface ChatEmbeddedSectionProps {
   isLoading: boolean;
   onSendMessage: (text?: string) => void;
   onResetSession: () => void;
-  /** Fired whenever the section enters/leaves the viewport, so the page can show
-   * the floating launcher only once this section has scrolled out of view. */
+  /** Notifica si la sección es visible en pantalla. */
   onVisibilityChange?: (isVisible: boolean) => void;
-  /** Fired when the visitor taps the "scroll down" invite below the chat panel. */
+  /** Invita a desplazarse a las siguientes secciones. */
   onScrollDownInvite?: () => void;
 }
 
@@ -56,9 +55,7 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
     return () => observer.disconnect();
   }, [onVisibilityChange]);
 
-  // Only auto-scroll the message list when it actually changed (a new message was
-  // added), never on mount — a boolean "first render" ref gets defeated by React's
-  // dev-mode StrictMode double-invoking effects, so compare the array identity instead.
+  // Desplaza automáticamente al recibir nuevos mensajes.
   useEffect(() => {
     if (messages !== lastMessagesRef.current) {
       lastMessagesRef.current = messages;
@@ -79,7 +76,7 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
     >
        <BackgroundBeams />
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+        {/* Encabezado */}
         <div className="text-center mb-2">
           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gold-800 tracking-wider uppercase mb-0.5">
             <Sparkles className="w-3.5 h-3.5" />
@@ -91,7 +88,7 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
 
         </div>
 
-        {/* Embedded Chat Panel */}
+        {/* Panel de chat */}
         <div className="relative rounded-2xl">
           <GlowingEffect
             spread={45}
@@ -103,10 +100,10 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
             variant="gold"
           />
           <div className="relative bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col">
-            {/* Top accent stripe */}
+            {/* Borde decorativo */}
             <div className="h-1 shrink-0 bg-gradient-to-r from-gold-500 via-brand-500 to-gold-500 bg-[length:200%_100%] animate-[shimmer_4s_linear_infinite]" />
 
-            {/* Header — blends into the panel instead of a solid color block */}
+            {/* Cabecera */}
             <div className="relative px-4 sm:px-5 py-3 flex items-center justify-between shrink-0 overflow-hidden">
               <div
                 className="pointer-events-none absolute inset-0 opacity-70"
@@ -145,7 +142,7 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
             </div>
             <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent shrink-0" />
 
-            {/* Messages */}
+            {/* Mensajes */}
           <div className="h-[230px] sm:h-[220px] overflow-y-auto overscroll-contain px-4 sm:px-5 py-2.5 bg-[#fbfcfe] space-y-2">
             {messages.map((msg) => (
               <ChatMessageItem key={msg.id} message={msg} />
@@ -153,12 +150,12 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggestions */}
+          {/* Sugerencias */}
           <div className="px-3 sm:px-4 border-t border-slate-100 bg-white shrink-0">
             <ChatSuggestions disabled={isLoading} onSelect={(prompt) => onSendMessage(prompt)} />
           </div>
 
-          {/* Input */}
+          {/* Entrada de texto */}
           <form
             onSubmit={handleSubmit}
             className="p-2.5 sm:p-3 bg-white border-t border-slate-100 flex items-center gap-2 shrink-0"
@@ -204,7 +201,7 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
           </div>
         </div>
 
-        {/* Scroll-down invite */}
+        {/* Botón de desplazamiento */}
         <motion.button
           type="button"
           onClick={onScrollDownInvite}

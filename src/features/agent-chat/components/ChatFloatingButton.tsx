@@ -13,7 +13,7 @@ const ASSISTANT_LOTTIE_SRC =
 interface ChatFloatingButtonProps {
   onClick: () => void;
   isOpen: boolean;
-  /** Hide the launcher while the embedded chat section up top is still on screen. */
+  /** Oculta el botón si la sección superior de chat está visible. */
   hideForSection?: boolean;
 }
 
@@ -49,7 +49,7 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
       >
         <MagneticButton strength={0.4} maxDistance={30}>
           <div className="relative">
-            {/* Floating bot mascot, no frame/background — moves together with the button */}
+            {/* Mascota virtual animada */}
             <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-20 h-20 sm:w-24 sm:h-24">
               <DotLottieReact src={ASSISTANT_LOTTIE_SRC} loop autoplay className="w-full h-full" />
               <span className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full shadow-sm" />
@@ -62,7 +62,6 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
               className="group flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white pl-4 pr-4 py-2.5 sm:pl-5 sm:pr-5 sm:py-2.5 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 cursor-pointer border border-brand-400/40 active:scale-95 whitespace-nowrap"
               aria-label="Abrir Asistente Virtual PNC"
             >
-              {/* Text Labels */}
               <div className="flex text-left flex-col">
                 <span className="font-display text-xs sm:text-sm font-bold leading-tight tracking-tight text-white">
                   Asistente Virtual PNC
@@ -72,7 +71,6 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
                 </span>
               </div>
 
-              {/* Chat icon */}
               <div className="ml-0.5 text-white/90">
                 <MessageSquare className="w-4 h-4 fill-white/20" />
               </div>

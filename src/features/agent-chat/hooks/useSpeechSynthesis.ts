@@ -7,14 +7,13 @@ function isSpeechSynthesisSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
-/** Speaks a given piece of text aloud using the browser's SpeechSynthesis API. */
+// Reproduce texto usando la API de síntesis de voz del navegador.
 export function useSpeechSynthesis(lang = "es-GT") {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Support depends on `window`, only known after mount — kept out of render so
-  // SSR output stays stable beforehand.
+  // Comprueba soporte en cliente tras el montaje.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSupported(isSpeechSynthesisSupported());
@@ -33,8 +32,7 @@ export function useSpeechSynthesis(lang = "es-GT") {
     (text: string) => {
       if (!isSpeechSynthesisSupported() || !text.trim()) return;
       window.speechSynthesis.cancel();
-      // Voice input and voice output are mutually exclusive — reading a reply
-      // aloud stops the mic if it's currently listening.
+      // Detiene el micrófono activo antes de reproducir audio.
       stopActiveMic();
 
       const utterance = new SpeechSynthesisUtterance(text);
