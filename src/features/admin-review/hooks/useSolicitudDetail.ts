@@ -13,7 +13,7 @@ export function useSolicitudDetail(id: string) {
 
   useEffect(() => {
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount/param-change, no data-fetch library available
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga del detalle por id
     setIsLoading(true);
     setError(null);
 

@@ -21,8 +21,7 @@ export function useSolicitudesList(initialEstado: EstadoSolicitud | "TODAS" = "P
   const [error, setError] = useState<string | null>(null);
   const [reloadIndex, setReloadIndex] = useState(0);
 
-  // Debounce del texto de búsqueda antes de disparar el fetch; al aplicarse,
-  // vuelve a la primera página.
+  // Debounce del filtro de búsqueda para volver a la primera página.
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedSearch(search.trim());
@@ -33,7 +32,7 @@ export function useSolicitudesList(initialEstado: EstadoSolicitud | "TODAS" = "P
 
   useEffect(() => {
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount/param-change, no data-fetch library available
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial y cambios de filtro
     setIsLoading(true);
     setError(null);
 
