@@ -1,4 +1,6 @@
-export type CausalTipo = "24" | "25" | "26";
+import type { CausalKey } from "@/lib/causales";
+
+export type CausalTipo = CausalKey;
 
 export interface SolicitudFormData {
   tramitaTercero: boolean;
@@ -25,9 +27,25 @@ export interface SolicitudFormData {
   causal: CausalTipo;
   numerosDocumento: string[];
   observaciones: string;
-  archivoFormulario?: string;
-  archivoDpi?: string;
-  archivoComprobante?: string;
+
+  archivoDpi?: File | null;
+  archivoComprobante?: File | null;
+
+  /** Solo relevante si esGestionadoPorTercero es true. */
+  archivoAutorizacion?: File | null;
+
+  /** El trámite lo puede presentar el titular o un tercero (familiar/abogado/apoderado). */
+  esGestionadoPorTercero: boolean;
+  gestorNombreCompleto?: string;
+  gestorCui?: string;
+  gestorRelacion?: string;
+  gestorTelefono?: string;
+  gestorCorreo?: string;
+
+  /** Dato opcional del solicitante/gestor, no del revisor. */
+  esEmpleadoGobierno: boolean;
+  empleadoPuesto?: string;
+  empleadoInstitucion?: string;
 }
 
 export interface SolicitudResult {
@@ -35,4 +53,8 @@ export interface SolicitudResult {
   fechaRadicacion: string;
   plazoDiasHabiles: number;
   causalNombre: string;
+  /** Link público para consultar el estado sin necesidad de credenciales. */
+  urlSeguimiento: string;
 }
+
+export type SolicitudApiResponse = SolicitudResult;

@@ -1,0 +1,75 @@
+import { z } from "zod";
+import { CAUSAL_KEYS } from "@/lib/causales";
+
+export const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+const causalEnum = z.enum(CAUSAL_KEYS as [string, ...string[]]);
+
+/**
+ * Validación del cuerpo (campos, no archivos) de una solicitud de exoneración.
+ * Compartida entre el Route Handler y, eventualmente, el wizard cliente.
+ */
+export const solicitudFormSchema = z
+  .object({
+    cui: z.string().regex(/^\d{13}$/, "CUI debe tener 13 dígitos"),
+    nombres: z.string().min(2, "Nombres es obligatorio"),
+    apellidos: z.string().min(2, "Apellidos es obligatorio"),
+    telefono: z.string().min(8, "Teléfono inválido"),
+    correo: z.string().email("Correo inválido"),
+    causal: causalEnum,
+    fechaVencimiento: z.string().min(1, "Fecha de vencimiento es obligatoria"),
+    fechaHecho: z.string().min(1, "Fecha del hecho es obligatoria"),
+    observaciones: z.string().optional(),
+
+    esGestionadoPorTercero: z.coerce.boolean().default(false),
+    gestorNombreCompleto: z.string().min(2).optional(),
+    gestorCui: z.string().regex(/^\d{13}$/).optional(),
+    gestorRelacion: z.string().min(2).optional(),
+    gestorTelefono: z.string().min(8).optional(),
+    gestorCorreo: z.string().email().optional(),
+
+    esEmpleadoGobierno: z.coerce.boolean().default(false),
+    empleadoPuesto: z.string().min(2).optional(),
+    empleadoInstitucion: z.string().min(2).optional(),
+  })
+  .refine(
+    (data) =>
+      !data.esGestionadoPorTercero ||
+      (data.gestorNombreCompleto &&
+        data.gestorCui &&
+        data.gestorRelacion &&
+        data.gestorCorreo &&
+        data.gestorTelefono),
+    {
+      message:
+        "Si el trámite lo gestiona un tercero, sus datos completos son obligatorios",
+      path: ["gestorNombreCompleto"],
+    }
+  )
+  .refine(
+    (data) =>
+      !data.esEmpleadoGobierno || (data.empleadoPuesto && data.empleadoInstitucion),
+    {
+      message: "Si es empleado de gobierno, puesto e institución son obligatorios",
+      path: ["empleadoPuesto"],
+    }
+  );
+
+export type SolicitudFormInput = z.infer<typeof solicitudFormSchema>;
+
+export function validateFile(
+  file: File | null | undefined,
+  { required, label }: { required: boolean; label: string }
+): string | null {
+  if (!file) {
+    return required ? `${label} es obligatorio` : null;
+  }
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    return `${label} debe ser PDF, JPG o PNG`;
+  }
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    return `${label} no debe superar 5 MB`;
+  }
+  return null;
+}

@@ -11,3 +11,100 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum CausalTramite {
+  FUERA_DEL_PAIS // Casilla 24, GAE 3111
+  ENFERMEDAD_ACCIDENTE // Casilla 25, GAE 3112
+  PRIVADO_LIBERTAD // Casilla 26, GAE 3113
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  EN_REVISION
+  APROBADA
+  RECHAZADA
+}
+
+model Solicitud {
+  id               String @id @default(cuid())
+  numeroExpediente String @unique
+  trackerToken     String @unique @default(cuid()) // token opaco para /seguimiento/{token}, no adivinable, distinto de numeroExpediente
+
+  // Titular de la multa/licencia (siempre presente)
+  cui       String
+  nombres   String
+  apellidos String
+  telefono  String
+  correo    String
+
+  causal           CausalTramite
+  fechaVencimiento DateTime
+  fechaHecho       DateTime
+  observaciones    String?
+
+  // Gestor/tercero (opcional) — presente solo si alguien distinto al titular presenta el trámite
+  esGestionadoPorTercero Boolean @default(false)
+  gestorNombreCompleto   String?
+  gestorCui              String?
+  gestorRelacion         String? // ej. "hijo", "cónyuge", "abogado", "apoderado"
+  gestorTelefono         String?
+  gestorCorreo           String?
+
+  // Empleado de gobierno (opcional) — del solicitante o del gestor, quien presente el trámite
+  esEmpleadoGobierno  Boolean @default(false)
+  empleadoPuesto      String?
+  empleadoInstitucion String?
+
+  dpiStoragePath  String
+  dpiOriginalName String
+  dpiContentType  String
+  dpiSizeBytes    Int
+  dpiUploadedAt   DateTime @default(now())
+
+  comprobanteStoragePath  String
+  comprobanteOriginalName String
+  comprobanteContentType  String
+  comprobanteSizeBytes    Int
+  comprobanteUploadedAt   DateTime @default(now())
+
+  // Carta poder / autorización — solo si esGestionadoPorTercero = true
+  autorizacionStoragePath  String?
+  autorizacionOriginalName String?
+  autorizacionContentType  String?
+  autorizacionSizeBytes    Int?
+  autorizacionUploadedAt   DateTime?
+
+  estado        EstadoSolicitud @default(PENDIENTE)
+  motivoRechazo String?
+  notaRevisor   String?
+  revisadoPor   String? // "admin" por ahora, string plano (no FK)
+  resueltoPor   String?
+  resueltoEn    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  historial EstadoHistorial[]
+
+  @@index([estado])
+  @@index([cui])
+}
+
+model EstadoHistorial {
+  id             String           @id @default(cuid())
+  solicitud      Solicitud        @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  solicitudId    String
+  estadoAnterior EstadoSolicitud?
+  estadoNuevo    EstadoSolicitud
+  actor          String // "admin" fijo por ahora
+  nota           String?
+  createdAt      DateTime         @default(now())
+
+  @@index([solicitudId])
+}
+
+model Sequence {
+  id      String @id @default("expediente")
+  year    Int
+  counter Int
+}

@@ -25,9 +25,11 @@ const INITIAL_DATA: SolicitudFormData = {
   telefono: "",
   telefonoAlternativo: "",
   correo: "",
-  causal: "25",
+  causal: "ENFERMEDAD_ACCIDENTE",
   numerosDocumento: [""],
   observaciones: "",
+  esGestionadoPorTercero: false,
+  esEmpleadoGobierno: false,
 };
 
 export function useSolicitud() {
@@ -84,9 +86,9 @@ export function useSolicitud() {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     const causalMap: Record<string, string> = {
-      "24": "Casilla 24: Estar Fuera del País (GAE 3111)",
-      "25": "Casilla 25: Enfermedad o Accidente (GAE 3112)",
-      "26": "Casilla 26: Privado de Libertad (GAE 3113)",
+      FUERA_DEL_PAIS: "Casilla 24: Estar Fuera del País (GAE 3111)",
+      ENFERMEDAD_ACCIDENTE: "Casilla 25: Enfermedad o Accidente (GAE 3112)",
+      PRIVADO_LIBERTAD: "Casilla 26: Privado de Libertad (GAE 3113)",
     };
 
     const generatedExp = `EXP-PNC-${Math.floor(100000 + Math.random() * 900000)}-2026`;
@@ -99,6 +101,7 @@ export function useSolicitud() {
       }),
       plazoDiasHabiles: 20,
       causalNombre: causalMap[formData.causal] || "Causal de Fuerza Mayor",
+      urlSeguimiento: "",
     });
 
     setCurrentStep(6);

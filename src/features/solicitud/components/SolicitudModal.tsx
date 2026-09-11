@@ -15,6 +15,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { SolicitudFormData, SolicitudResult, CausalTipo } from "../types";
+import { CAUSALES } from "@/lib/causales";
 
 interface SolicitudModalProps {
   isOpen: boolean;
@@ -50,21 +51,21 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
 
   const motivos = [
     {
-      id: "24",
+      id: "FUERA_DEL_PAIS",
       titulo: "Estar fuera del país",
       descripcion: "Haberse encontrado fuera de Guatemala al momento en que caducó la licencia.",
       requisito: "Constancia de movimiento migratorio.",
       variant: "blue",
     },
     {
-      id: "25",
+      id: "ENFERMEDAD_ACCIDENTE",
       titulo: "Enfermedad",
       descripcion: "Hospitalización, reposo prescrito o impedimento físico.",
       requisito: "Constancia de consulta médica por colegiado activo.",
       variant: "green",
     },
     {
-      id: "26",
+      id: "PRIVADO_LIBERTAD",
       titulo: "Prisión",
       descripcion: "Prisión preventiva o cumplimiento de condena penal.",
       requisito: "Constancia de estadía en prisión.",
@@ -462,7 +463,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
                 <span className="block rounded-xl border-2 border-slate-200 bg-white p-4 transition-all hover:border-slate-300 peer-checked:border-blue-600 peer-checked:bg-blue-50/50 peer-checked:shadow-xs peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-600">
                   <span className="mb-1 flex items-center justify-between gap-3">
                     <span className="text-sm font-bold text-slate-900">{motivo.titulo}</span>
-                    <Badge variant={motivo.variant}>Casilla {motivo.id}</Badge>
+                    <Badge variant={motivo.variant}>{CAUSALES[motivo.id].casilla}</Badge>
                   </span>
                   <span className="mb-2 block text-xs text-slate-600">{motivo.descripcion}</span>
                   <span className="block text-[11px] font-medium text-blue-800">
@@ -544,9 +545,9 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
                 <FileText className="w-5 h-5 text-blue-600 shrink-0" />
                 <div>
                   <h5 className="text-xs font-bold text-slate-900">
-                    2. {formData.causal === "26"
+                    2. {formData.causal === "PRIVADO_LIBERTAD"
                       ? "Constancia de estadía en prisión"
-                      : formData.causal === "25"
+                      : formData.causal === "ENFERMEDAD_ACCIDENTE"
                         ? "Constancia de consulta médica por colegiado activo"
                         : "Constancia de movimiento migratorio"}
                   </h5>

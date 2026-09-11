@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Public_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui";
 
 const publicSans = Public_Sans({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans bg-white text-slate-900">
         {children}
+        <Toaster />
       </body>
     </html>
   );

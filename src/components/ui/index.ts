@@ -9,3 +9,7 @@ export * from "./field";
 export * from "./label";
 export * from "./separator";
 export * from "./background-ripple-effect";
+export * from "./table";
+export * from "./select";
+export * from "./textarea";
+export * from "./sonner";
