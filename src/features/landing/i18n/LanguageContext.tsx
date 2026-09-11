@@ -13,10 +13,7 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Always the default locale on the server and on first client render, so
-  // SSR output and the pre-hydration DOM match — the stored preference (if
-  // any) is applied post-mount, same pattern as
-  // src/features/agent-chat/hooks/useSpeechRecognition.ts's isSupported flag.
+  // Idioma inicial para SSR; sincroniza con localStorage al montar en cliente.
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
@@ -25,7 +22,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (isLocale(stored)) setLocaleState(stored);
     } catch {
-      // localStorage unavailable (private mode, etc.) — stay on the default locale.
+      // Fallback silencioso si localStorage no está disponible.
     }
   }, []);
 
@@ -34,7 +31,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
     } catch {
-      // Ignore — the choice just won't persist across reloads.
+      // Ignora si no se puede persistir en localStorage.
     }
   }, []);
 

@@ -1,15 +1,6 @@
 import type { Dictionary } from "./types";
 
-/**
- * K'iche' (Mayan language, Guatemala). This is an AI best-effort translation,
- * NOT a certified one — K'iche' is a low-resource language for AI, especially
- * for modern institutional/legal vocabulary. Spanish loanwords are kept
- * deliberately for terms with no established K'iche' equivalent (multa,
- * licencia, trámite, Acuerdo Gubernativo, GAE codes, form/office names), which
- * mirrors real Mayan-language government communication practice. A visible
- * on-page disclaimer (see `kicheDisclaimer` below) tells the reader this needs
- * review by a native speaker — do not remove that disclaimer without one.
- */
+// Diccionario en idioma K'iche' (traducción preliminar sujeta a revisión).
 export const qu: Dictionary = {
   common: {
     nationalEmblemAlt: "Retal Amaq' Iximulew",

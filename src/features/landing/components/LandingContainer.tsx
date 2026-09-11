@@ -11,7 +11,6 @@ import { Footer } from "./Footer";
 import { KicheDisclaimerBanner } from "./KicheDisclaimerBanner";
 import { LanguageProvider } from "../i18n/LanguageContext";
 
-// Cross-feature imports strictly from public APIs (index.ts) as required by AGENTS.md
 import {
   useAgentChat,
   ChatDrawer,
@@ -58,16 +57,16 @@ export const LandingContainer: React.FC = () => {
   return (
     <LanguageProvider>
     <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-blue-100 selection:text-blue-900">
-      {/* K'iche' preliminary-translation notice — only visible in that locale */}
+      {/* Aviso de idioma K'iche' */}
       <KicheDisclaimerBanner />
 
-      {/* Header Navigation */}
+      {/* Navegación */}
       <Header
         onOpenSolicitud={openSolicitud}
         onOpenChat={() => setIsChatOpen(true)}
       />
 
-      {/* Main Page Sections */}
+      {/* Contenido principal */}
       <main className="flex-1">
         <ChatEmbeddedSection
           messages={messages}
@@ -91,10 +90,10 @@ export const LandingContainer: React.FC = () => {
         <FaqSection />
       </main>
 
-      {/* Footer */}
+      {/* Pie de página */}
       <Footer />
 
-      {/* Online Application Modal Wizard */}
+      {/* Modal de solicitud en línea */}
       <SolicitudModal
         isOpen={isSolicitudOpen}
         onClose={closeSolicitud}
@@ -109,7 +108,7 @@ export const LandingContainer: React.FC = () => {
         result={solicitudResult}
       />
 
-      {/* Virtual PNC Assistant Centered Modal */}
+      {/* Modal del asistente virtual */}
       <ChatDrawer
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
@@ -121,7 +120,7 @@ export const LandingContainer: React.FC = () => {
         onResetSession={resetSession}
       />
 
-      {/* Floating Action Button (with Magnetic Effect) — hidden while the embedded chat section up top is on screen */}
+      {/* Botón flotante del chat */}
       <ChatFloatingButton
         onClick={toggleChat}
         isOpen={isChatOpen}

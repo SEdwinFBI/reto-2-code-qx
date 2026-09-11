@@ -1,12 +1,6 @@
 import React from "react";
 
-/**
- * Lets translated dictionary strings carry the handful of inline emphasis
- * styles this page actually uses, without needing per-locale JSX:
- *   **text**  -> dark bold        __text__ -> plain bold
- *   !!text!!  -> red bold         ++text++ -> green bold
- *   ##text##  -> brand-blue bold  \n       -> <br/>
- */
+// Renderiza formato enriquecido para textos i18n (**negrita**, !!alerta!!, ++éxito++, ##destacado##).
 const MARKER_PATTERN = /\*\*(.+?)\*\*|__(.+?)__|!!(.+?)!!|\+\+(.+?)\+\+|##(.+?)##/g;
 
 function renderLine(line: string, keyPrefix: string): React.ReactNode[] {

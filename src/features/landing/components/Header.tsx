@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand / Emblem */}
+        {/* Emblema institucional */}
         <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
           <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-gold-500/70 shadow-sm shrink-0">
             <Image
@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Acciones principales */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Button
             variant="outline"

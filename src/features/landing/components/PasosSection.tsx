@@ -26,17 +26,14 @@ export const PasosSection: React.FC = () => {
               key={index}
               className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs hover:shadow-md transition-shadow relative flex flex-col"
             >
-              {/* Number Badge */}
               <div className="font-display w-10 h-10 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center text-base mb-5 shadow-xs">
                 {index + 1}
               </div>
 
-              {/* Title */}
               <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-2">
                 {p.titulo}
               </h4>
 
-              {/* Description */}
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 <RichText text={p.descripcion} />
               </p>

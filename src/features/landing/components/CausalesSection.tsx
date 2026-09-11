@@ -19,7 +19,7 @@ export const CausalesSection: React.FC = () => {
   return (
     <section className="py-16 sm:py-20 bg-slate-50/60 border-t border-slate-200/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+        {/* Encabezado */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-bold text-gold-800 tracking-wider uppercase mb-2 block">
             {dict.causales.eyebrow}
@@ -30,7 +30,7 @@ export const CausalesSection: React.FC = () => {
           <p className="text-sm sm:text-base text-slate-600">{dict.causales.subheading}</p>
         </div>
 
-        {/* 3 Causales Cards — each an interactive 3D "pin" linking to its official trámite */}
+        {/* Tarjetas de causales */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {causales.map((c) => {
             const Icon = c.icon;
@@ -43,7 +43,6 @@ export const CausalesSection: React.FC = () => {
                 >
                   <div className="flex w-[19rem] flex-col justify-between p-1 sm:w-[20rem]">
                     <div>
-                      {/* Top Row: Casilla Badge + Icon */}
                       <div className="mb-4 flex items-center justify-between">
                         <Badge variant={c.badgeVariant} className="px-2.5 py-1 text-xs font-semibold">
                           {c.casillaLabel}
@@ -53,7 +52,6 @@ export const CausalesSection: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Title & Description */}
                       <h4 className="mb-2 text-lg font-bold text-slate-100">{c.title}</h4>
                       <p className="mb-6 text-xs leading-relaxed text-white sm:text-sm">
                         {c.description}
@@ -61,7 +59,6 @@ export const CausalesSection: React.FC = () => {
                     </div>
 
                     <div>
-                      {/* Inner Highlight Box */}
                       <div className="mb-4 rounded-xl border border-gold-500/20 bg-gold-500/5 p-3">
                         <span className="mb-1 block text-xs font-bold text-white">
                           {dict.causales.requisitoLabel}
@@ -69,7 +66,6 @@ export const CausalesSection: React.FC = () => {
                         <p className="text-xs leading-normal text-slate-300">{c.requisito}</p>
                       </div>
 
-                      {/* Footer GAE Code */}
                       <div className="font-mono text-[11px] text-white">
                         {dict.causales.codigoLabel} {c.gae}
                       </div>

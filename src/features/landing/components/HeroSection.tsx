@@ -50,7 +50,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
       >
-        {/* Pill Tag */}
+        {/* Etiqueta superior */}
         <motion.div
           variants={textItem}
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-50 border border-gold-200/80 mb-3 shadow-xs"
@@ -61,7 +61,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </span>
         </motion.div>
 
-        {/* Main Heading */}
+        {/* Título principal */}
         <motion.h2
           variants={textItem}
           className="font-display text-3xl sm:text-5xl lg:text-5xl font-bold text-navy-900 tracking-tight leading-[1.15] mb-3"
@@ -73,7 +73,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </Highlight>
         </motion.h2>
 
-        {/* Subtitle */}
+        {/* Subtítulo */}
         <motion.p
           variants={textItem}
           className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-4 leading-relaxed font-normal"
@@ -81,16 +81,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <RichText text={dict.hero.subtitle} />
         </motion.p>
 
-
-
-        {/* 3 Stat Cards in a row */}
-
-
+        {/* Tarjetas de estadísticas */}
         <motion.div
           variants={textItem}
           className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-4"
         >
-          {/* Card 1 */}
           <div className="relative bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs text-center transition-transform hover:-translate-y-0.5">
             <GlowingEffect
               spread={40}
@@ -109,7 +104,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Card 2 */}
           <div className="relative bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs text-center transition-transform hover:-translate-y-0.5">
             <GlowingEffect
               spread={40}
@@ -128,7 +122,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Card 3 */}
           <div className="relative bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs text-center transition-transform hover:-translate-y-0.5">
             <GlowingEffect
               spread={40}
@@ -148,7 +141,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </motion.div>
 
-        {/* Digital Application Callout Card */}
+        {/* Tarjeta de inicio de trámite digital */}
         <motion.div
           variants={textItem}
           className="max-w-2xl mx-auto bg-white border border-brand-200/90 rounded-2xl p-3 sm:p-3.5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-left hover:border-brand-500/60 transition-colors"

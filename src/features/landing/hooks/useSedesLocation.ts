@@ -7,7 +7,7 @@ type Location = { latitude: number; longitude: number };
 
 export type LocationErrorCode = "unsupported" | "denied" | "unknown" | null;
 
-// Google Maps doesn't support K'iche' as a UI language — fall back to Spanish.
+// Google Maps no soporta K'iche'; usa español por defecto.
 function mapsUiLanguage(locale: Locale): string {
   return locale === "en" ? "en" : "es";
 }
@@ -37,9 +37,7 @@ export function useSedesLocation(locale: Locale = "es") {
     );
   };
 
-  // Google Maps resolves the search results; no office data is fabricated locally.
-  // The search query text itself stays in Spanish regardless of locale — it's a
-  // technical parameter for Google's own index, not UI copy.
+  // Parámetros de búsqueda para el mapa oficial de sedes PNC.
   const center = location ? `${location.latitude},${location.longitude}` : null;
   const query = center
     ? `Departamento de Tránsito PNC Guatemala cerca de ${center}`

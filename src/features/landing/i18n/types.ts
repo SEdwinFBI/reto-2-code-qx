@@ -9,13 +9,13 @@ export interface CausalEntry {
 
 export interface PasoEntry {
   titulo: string;
-  /** May contain RichText markers — see i18n/RichText.tsx */
+  /** Admite formato enriquecido (RichText) */
   descripcion: string;
 }
 
 export interface FaqEntry {
   question: string;
-  /** May contain RichText markers — see i18n/RichText.tsx */
+  /** Admite formato enriquecido (RichText) */
   answer: string;
 }
 
@@ -35,7 +35,7 @@ export interface Dictionary {
     eyebrow: string;
     headingLine1: string;
     headingLine2: string;
-    /** May contain RichText markers */
+    /** Admite formato enriquecido (RichText) */
     subtitle: string;
     stat1Value: string;
     stat1Caption: string;
@@ -88,6 +88,6 @@ export interface Dictionary {
     legal: string;
     badge: string;
   };
-  /** Rendered only when locale === "qu" — written in K'iche' itself. */
+  /** Visible únicamente en la versión en K'iche'. */
   kicheDisclaimer: string;
 }
