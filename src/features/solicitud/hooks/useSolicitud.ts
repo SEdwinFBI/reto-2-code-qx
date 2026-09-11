@@ -60,8 +60,7 @@ export function useSolicitud() {
   };
 
   const consultarPersona = () => {
-    // Consulta de demostración, al igual que el envío actual del formulario.
-    // Sustituir estos datos cuando se conecte el servicio de identidad.
+    // Simulación de consulta de identidad (RENAP / Maycom).
     setFormData((prev) => ({
       ...prev,
       nombres: "Persona",
@@ -82,7 +81,7 @@ export function useSolicitud() {
 
   const submitSolicitud = async () => {
     setIsSubmitting(true);
-    // Simulate brief processing
+    // Simulación de tiempo de procesamiento de envío.
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     const causalMap: Record<string, string> = {

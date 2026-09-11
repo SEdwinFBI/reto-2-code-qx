@@ -31,10 +31,10 @@ export interface SolicitudFormData {
   archivoDpi?: File | null;
   archivoComprobante?: File | null;
 
-  /** Solo relevante si esGestionadoPorTercero es true. */
+  /** Requerido si esGestionadoPorTercero es true. */
   archivoAutorizacion?: File | null;
 
-  /** El trámite lo puede presentar el titular o un tercero (familiar/abogado/apoderado). */
+  /** Trámite presentado por titular o tercero autorizado. */
   esGestionadoPorTercero: boolean;
   gestorNombreCompleto?: string;
   gestorCui?: string;
@@ -42,7 +42,7 @@ export interface SolicitudFormData {
   gestorTelefono?: string;
   gestorCorreo?: string;
 
-  /** Dato opcional del solicitante/gestor, no del revisor. */
+  /** Información laboral del solicitante (opcional). */
   esEmpleadoGobierno: boolean;
   empleadoPuesto?: string;
   empleadoInstitucion?: string;
@@ -53,7 +53,7 @@ export interface SolicitudResult {
   fechaRadicacion: string;
   plazoDiasHabiles: number;
   causalNombre: string;
-  /** Link público para consultar el estado sin necesidad de credenciales. */
+  /** Enlace público para consultar el estado del trámite. */
   urlSeguimiento: string;
 }
 
