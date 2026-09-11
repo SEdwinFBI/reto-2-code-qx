@@ -23,7 +23,7 @@ export interface FormInputProps extends React.ComponentProps<"input"> {
   helperText?: string;
 }
 
-/** Input pre-wired with the Field/Label/Description primitives for quick label + helper-text forms. */
+// Input con etiqueta, descripción y estado de error.
 function FormInput({ label, error, helperText, id, className, ...props }: FormInputProps) {
   const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 

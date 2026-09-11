@@ -25,7 +25,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
 
-    // Measure from the static container to prevent feedback loops and jitter
+    // Calcula respecto al contenedor estático para evitar vibraciones.
     const rect = containerRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;

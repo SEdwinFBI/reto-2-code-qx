@@ -55,9 +55,7 @@ export function HoverBorderGradient({
       return () => clearInterval(interval);
     }
   }, [hovered]);
-  // `Tag` is a bare React.ElementType (polymorphic "as" prop), which TS can't resolve
-  // to a concrete prop shape — casting to a permissive component type avoids the
-  // whole props bag collapsing to `never` at the JSX call site.
+  // Casteo polimórfico para mantener compatibilidad de tipos JSX.
   const Component = Tag as React.ComponentType<React.HTMLAttributes<HTMLElement>>;
   return (
     <Component

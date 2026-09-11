@@ -52,7 +52,7 @@ type DivGridProps = {
   className?: string;
   rows: number;
   cols: number;
-  cellSize: number; // in pixels
+  cellSize: number; // en píxeles
   borderColor: string;
   fillColor: string;
   clickedCell: { row: number; col: number } | null;

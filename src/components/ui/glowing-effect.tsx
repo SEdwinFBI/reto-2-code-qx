@@ -80,7 +80,7 @@ const GlowingEffect = memo(
           var(--black, #000) calc(25% / var(--repeating-conic-gradient-times))
         )`;
       }
-      // Default multicolor
+      // Degradado multicolor por defecto
       return `radial-gradient(circle, #dd7bbb 10%, #dd7bbb00 20%),
         radial-gradient(circle at 40% 40%, #d79f1e 5%, #d79f1e00 15%),
         radial-gradient(circle at 60% 60%, #5a922c 10%, #5a922c00 20%), 

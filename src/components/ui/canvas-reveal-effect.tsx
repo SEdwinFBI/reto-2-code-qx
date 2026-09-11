@@ -12,10 +12,7 @@ export const CanvasRevealEffect = ({
   dotSize,
   showGradient = true,
 }: {
-  /**
-   * 0.1 - slower
-   * 1.0 - faster
-   */
+  /** Velocidad de animación (0.1 lento - 1.0 rápido) */
   animationSpeed?: number;
   opacities?: number[];
   colors?: number[][];
@@ -250,11 +247,11 @@ const ShaderMaterial = ({
     preparedUniforms["u_time"] = { value: 0, type: "1f" };
     preparedUniforms["u_resolution"] = {
       value: new THREE.Vector2(size.width * 2, size.height * 2),
-    }; // Initialize u_resolution
+    };
     return preparedUniforms;
   };
 
-  // Shader material
+  // Material de sombreado (Three.js)
   const material = useMemo(() => {
     const materialObject = new THREE.ShaderMaterial({
       vertexShader: `
