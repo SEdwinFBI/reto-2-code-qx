@@ -4,6 +4,8 @@ export * from "./components/SolicitudDetailPanel";
 export * from "./components/EstadoBadge";
 export * from "./components/AdminShell";
 export * from "./components/IniciarRevisionModal";
+export * from "./components/AprobarSolicitudModal";
+export * from "./components/RechazarSolicitudModal";
 export * from "./hooks/useAdminAuth";
 export * from "./hooks/useSolicitudesList";
 export * from "./hooks/useSolicitudDetail";

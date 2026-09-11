@@ -198,6 +198,7 @@ export async function POST(request: NextRequest) {
       numeroExpediente: solicitud.numeroExpediente,
       trackerToken: solicitud.trackerToken,
       plazoDiasHabiles: PLAZO_DIAS_HABILES,
+      causal,
     });
 
     const base = process.env.APP_BASE_URL || "http://localhost:3000";

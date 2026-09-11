@@ -8,6 +8,7 @@ import {
 import { validateFile } from "@/lib/validation/solicitud";
 import { sendEnRevisionEmail, sendResolucionEmail } from "@/lib/mailer";
 import { verifySessionToken, ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
+import type { CausalKey } from "@/lib/causales";
 import type { PrismaTransactionClient } from "@/lib/prisma";
 import type { EstadoSolicitud } from "../../../../../generated/prisma/enums";
 
@@ -190,6 +191,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       to: destinatario,
       numeroExpediente: updated.numeroExpediente,
       trackerToken: updated.trackerToken,
+      causal: updated.causal as CausalKey,
     });
   } else {
     await sendResolucionEmail({
@@ -198,6 +200,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       trackerToken: updated.trackerToken,
       aprobado: accionStr === "aprobar",
       motivoRechazo: updated.motivoRechazo ?? undefined,
+      causal: updated.causal as CausalKey,
     });
   }
 

@@ -15,8 +15,10 @@ import {
 } from "@/components/ui";
 import { CAUSALES } from "@/lib/causales";
 import { useSolicitudesList } from "../hooks/useSolicitudesList";
+import { AprobarSolicitudModal } from "./AprobarSolicitudModal";
 import { EstadoBadge } from "./EstadoBadge";
 import { IniciarRevisionModal } from "./IniciarRevisionModal";
+import { RechazarSolicitudModal } from "./RechazarSolicitudModal";
 import { SolicitudesFilters } from "./SolicitudesFilters";
 import { SolicitudesPagination } from "./SolicitudesPagination";
 
@@ -44,6 +46,8 @@ export function SolicitudesTable() {
   } = useSolicitudesList();
 
   const [revisionSolicitudId, setRevisionSolicitudId] = useState<string | null>(null);
+  const [aprobarSolicitudId, setAprobarSolicitudId] = useState<string | null>(null);
+  const [rechazarSolicitudId, setRechazarSolicitudId] = useState<string | null>(null);
 
   const totalGeneral = Object.values(countsByEstado).reduce((sum, n) => sum + (n ?? 0), 0);
 
@@ -120,15 +124,43 @@ export function SolicitudesTable() {
                     <EstadoBadge estado={s.estado} />
                   </TableCell>
                   <TableCell>
-                    {s.estado === "PENDIENTE" && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setRevisionSolicitudId(s.id)}
-                      >
-                        Iniciar revisión
-                      </Button>
-                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {s.estado === "PENDIENTE" && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setRevisionSolicitudId(s.id)}
+                        >
+                          Iniciar revisión
+                        </Button>
+                      )}
+                      {s.estado === "EN_REVISION" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            nativeButton={false}
+                            render={<Link href={`/admin/solicitudes/${s.id}`} />}
+                          >
+                            Ver detalle
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setAprobarSolicitudId(s.id)}
+                          >
+                            Aprobar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setRechazarSolicitudId(s.id)}
+                          >
+                            Rechazar
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -146,6 +178,22 @@ export function SolicitudesTable() {
           solicitudId={revisionSolicitudId}
           onClose={() => setRevisionSolicitudId(null)}
           onRevisionIniciada={reload}
+        />
+      )}
+
+      {aprobarSolicitudId && (
+        <AprobarSolicitudModal
+          solicitudId={aprobarSolicitudId}
+          onClose={() => setAprobarSolicitudId(null)}
+          onAprobada={reload}
+        />
+      )}
+
+      {rechazarSolicitudId && (
+        <RechazarSolicitudModal
+          solicitudId={rechazarSolicitudId}
+          onClose={() => setRechazarSolicitudId(null)}
+          onRechazada={reload}
         />
       )}
     </div>
