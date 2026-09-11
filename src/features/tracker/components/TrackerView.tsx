@@ -37,12 +37,7 @@ interface TimelinePaso {
   estado: PasoEstado;
 }
 
-/**
- * Deriva los pasos del timeline a partir del historial real de transiciones
- * (para fechas exactas) y el estado actual. El paso "En revisión" se omite si
- * la solicitud fue aprobada/rechazada saltándoselo (ALLOWED_FROM lo permite
- * desde el backend admin).
- */
+// Construye los pasos del timeline a partir del historial de la solicitud.
 function buildTimeline(status: TrackerStatus): TimelinePaso[] {
   const fechaPorEstado = new Map(status.historial.map((h) => [h.estadoNuevo, h.createdAt]));
   const esTerminal = status.estado === "APROBADA" || status.estado === "RECHAZADA";
@@ -53,15 +48,14 @@ function buildTimeline(status: TrackerStatus): TimelinePaso[] {
 
   const fechaEnRevision = fechaPorEstado.get("EN_REVISION") ?? null;
   if (status.estado === "EN_REVISION") {
-    // Es el paso actual, aunque ya exista su fecha en el historial (la transición que nos
-    // trajo a este estado) — debe verse "en curso", no como completado.
+    // Estado en curso actual.
     pasos.push({ label: "En revisión", fecha: fechaEnRevision, estado: "actual" });
   } else if (fechaEnRevision) {
     pasos.push({ label: "En revisión", fecha: fechaEnRevision, estado: "completo" });
   } else if (!esTerminal) {
     pasos.push({ label: "En revisión", fecha: null, estado: "pendiente" });
   }
-  // Si es terminal y no hay entrada de EN_REVISION, se omite: se saltó ese paso.
+  // Omitir si pasó directamente a estado terminal.
 
   if (status.estado === "APROBADA") {
     pasos.push({ label: "Aprobada", fecha: fechaPorEstado.get("APROBADA") ?? null, estado: "aprobado" });
