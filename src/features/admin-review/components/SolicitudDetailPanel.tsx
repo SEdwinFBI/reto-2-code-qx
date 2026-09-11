@@ -1,14 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, CheckCircle2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Card, CardContent, CardHeader, CardTitle, FormTextarea } from "@/components/ui";
+import { Button, FormTextarea } from "@/components/ui";
+import { EstadoTimeline } from "@/components/feedback/EstadoTimeline";
 import { CAUSALES } from "@/lib/causales";
 import { useSolicitudDetail } from "../hooks/useSolicitudDetail";
+import { DatosGrid } from "./DatosGrid";
+import { DocumentoRow, type DocumentoCategoria } from "./DocumentoRow";
 import { EstadoBadge } from "./EstadoBadge";
 
+function SeccionCard({
+  titulo,
+  subtitulo,
+  children,
+}: {
+  titulo: string;
+  subtitulo?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+      <div className="border-b border-slate-100 px-5 py-4">
+        <h2 className="font-display text-sm font-bold tracking-tight text-navy-900">{titulo}</h2>
+        {subtitulo && <p className="mt-0.5 text-xs text-slate-500">{subtitulo}</p>}
+      </div>
+      <div className="flex flex-col gap-3 p-5">{children}</div>
+    </div>
+  );
+}
+
 export function SolicitudDetailPanel({ id }: { id: string }) {
+  const router = useRouter();
   const { solicitud, isLoading, error, ejecutarAccion, isSubmittingAccion } =
     useSolicitudDetail(id);
   const [motivoRechazo, setMotivoRechazo] = useState("");
@@ -50,108 +75,114 @@ export function SolicitudDetailPanel({ id }: { id: string }) {
 
   const causalInfo = CAUSALES[solicitud.causal];
 
+  const documentos: { categoria: DocumentoCategoria; label: string; url: string; originalName: string }[] = [
+    { categoria: "DPI", label: "DPI", url: solicitud.dpiUrl, originalName: solicitud.dpiOriginalName },
+    {
+      categoria: "COMPROBANTE",
+      label: "Comprobante",
+      url: solicitud.comprobanteUrl,
+      originalName: solicitud.comprobanteOriginalName,
+    },
+    ...(solicitud.autorizacionUrl
+      ? [
+          {
+            categoria: "AUTORIZACION" as const,
+            label: "Autorización / carta poder",
+            url: solicitud.autorizacionUrl,
+            originalName: solicitud.autorizacionOriginalName ?? "",
+          },
+        ]
+      : []),
+    ...(solicitud.resolucionUrl
+      ? [
+          {
+            categoria: "RESOLUCION" as const,
+            label: "Resolución / exoneración",
+            url: solicitud.resolucionUrl,
+            originalName: solicitud.resolucionOriginalName ?? "",
+          },
+        ]
+      : []),
+  ];
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-fit gap-1.5 text-muted-foreground hover:text-foreground"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Volver
+      </Button>
+
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-lg font-semibold">{solicitud.numeroExpediente}</h1>
+        <h1 className="font-display text-xl font-bold tracking-tight text-navy-900">
+          {solicitud.numeroExpediente}
+        </h1>
         <EstadoBadge estado={solicitud.estado} />
       </div>
 
-      <Card>
-        <CardHeader className="border-b [.border-b]:pb-3">
-          <CardTitle className="font-display">Titular</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <p>
-            {solicitud.nombres} {solicitud.apellidos} — CUI {solicitud.cui}
-          </p>
-          <p>Teléfono: {solicitud.telefono}</p>
-          <p>Correo: {solicitud.correo}</p>
-          <p>
-            Causal: {causalInfo.titulo} ({causalInfo.casilla}, GAE {causalInfo.gae})
-          </p>
-          <p>Requisito: {causalInfo.requisitoComprobante}</p>
-          {solicitud.observaciones && <p>Observaciones: {solicitud.observaciones}</p>}
-        </CardContent>
-      </Card>
+      <SeccionCard titulo="Titular">
+        <DatosGrid
+          filas={[
+            { label: "Nombre", valor: `${solicitud.nombres} ${solicitud.apellidos}` },
+            { label: "CUI", valor: solicitud.cui },
+            { label: "Teléfono", valor: solicitud.telefono },
+            { label: "Correo", valor: solicitud.correo },
+            {
+              label: "Causal",
+              valor: `${causalInfo.titulo} (${causalInfo.casilla}, GAE ${causalInfo.gae})`,
+            },
+            { label: "Requisito", valor: causalInfo.requisitoComprobante },
+            ...(solicitud.observaciones
+              ? [{ label: "Observaciones", valor: solicitud.observaciones }]
+              : []),
+          ]}
+        />
+      </SeccionCard>
 
       {solicitud.esGestionadoPorTercero && (
-        <Card>
-          <CardHeader className="border-b [.border-b]:pb-3">
-            <CardTitle className="font-display">Gestor / tercero</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <p>
-              {solicitud.gestorNombreCompleto} — CUI {solicitud.gestorCui}
-            </p>
-            <p>Relación con el titular: {solicitud.gestorRelacion}</p>
-            <p>Teléfono: {solicitud.gestorTelefono}</p>
-            <p>Correo: {solicitud.gestorCorreo}</p>
-          </CardContent>
-        </Card>
+        <SeccionCard titulo="Gestor / tercero">
+          <DatosGrid
+            filas={[
+              { label: "Nombre", valor: solicitud.gestorNombreCompleto },
+              { label: "CUI", valor: solicitud.gestorCui },
+              { label: "Relación con el titular", valor: solicitud.gestorRelacion },
+              { label: "Teléfono", valor: solicitud.gestorTelefono },
+              { label: "Correo", valor: solicitud.gestorCorreo },
+            ]}
+          />
+        </SeccionCard>
       )}
 
       {solicitud.esEmpleadoGobierno && (
-        <Card>
-          <CardHeader className="border-b [.border-b]:pb-3">
-            <CardTitle className="font-display">Empleado de gobierno</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <p>Puesto: {solicitud.empleadoPuesto}</p>
-            <p>Institución: {solicitud.empleadoInstitucion}</p>
-          </CardContent>
-        </Card>
+        <SeccionCard titulo="Empleado de gobierno">
+          <DatosGrid
+            filas={[
+              { label: "Puesto", valor: solicitud.empleadoPuesto },
+              { label: "Institución", valor: solicitud.empleadoInstitucion },
+            ]}
+          />
+        </SeccionCard>
       )}
 
-      <Card>
-        <CardHeader className="border-b [.border-b]:pb-3">
-          <CardTitle className="font-display">Documentos</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <a href={solicitud.dpiUrl} target="_blank" rel="noopener noreferrer" className="underline">
-            DPI — {solicitud.dpiOriginalName}
-          </a>
-          <a
-            href={solicitud.comprobanteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            Comprobante — {solicitud.comprobanteOriginalName}
-          </a>
-          {solicitud.autorizacionUrl && (
-            <a
-              href={solicitud.autorizacionUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              Autorización / carta poder — {solicitud.autorizacionOriginalName}
-            </a>
-          )}
-          {solicitud.resolucionUrl && (
-            <a
-              href={solicitud.resolucionUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              Resolución / exoneración — {solicitud.resolucionOriginalName}
-            </a>
-          )}
-        </CardContent>
-      </Card>
+      <SeccionCard
+        titulo="Documentos"
+        subtitulo="Comprobantes y respaldos adjuntos al expediente"
+      >
+        {documentos.map((doc) => (
+          <DocumentoRow key={doc.categoria} {...doc} />
+        ))}
+      </SeccionCard>
 
       {(solicitud.estado === "PENDIENTE" || solicitud.estado === "EN_REVISION") && (
-        <Card>
-          <CardHeader className="border-b [.border-b]:pb-3">
-            <CardTitle className="font-display">Acciones de revisión</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Adjunte la resolución solo si va a aprobar. El motivo es obligatorio solo si va a
-              rechazar.
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+        <SeccionCard
+          titulo="Acciones de revisión"
+          subtitulo="Adjunte la resolución solo si va a aprobar. El motivo es obligatorio solo si va a rechazar."
+        >
+          <div className="flex flex-col gap-4">
             <FormTextarea
               label="Nota interna (opcional)"
               value={nota}
@@ -216,37 +247,26 @@ export function SolicitudDetailPanel({ id }: { id: string }) {
                 Rechazar
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SeccionCard>
       )}
 
       {solicitud.motivoRechazo && (
-        <Card>
-          <CardHeader className="border-b [.border-b]:pb-3">
-            <CardTitle className="font-display">Motivo de rechazo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{solicitud.motivoRechazo}</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-red-100 bg-red-50 p-4">
+          <p className="text-xs font-semibold tracking-wide text-red-800 uppercase">
+            Motivo de rechazo
+          </p>
+          <p className="mt-1 text-sm text-red-700">{solicitud.motivoRechazo}</p>
+        </div>
       )}
 
-      <Card>
-        <CardHeader className="border-b [.border-b]:pb-3">
-          <CardTitle className="font-display">Historial</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
-            {solicitud.historial.map((h) => (
-              <li key={h.id}>
-                {new Date(h.createdAt).toLocaleString()} — {h.estadoAnterior ?? "—"} →{" "}
-                {h.estadoNuevo} ({h.actor})
-                {h.nota ? `: ${h.nota}` : ""}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <SeccionCard titulo="Historial del trámite">
+        <EstadoTimeline
+          estado={solicitud.estado}
+          historial={solicitud.historial}
+          fechaRadicacion={solicitud.createdAt}
+        />
+      </SeccionCard>
     </div>
   );
 }

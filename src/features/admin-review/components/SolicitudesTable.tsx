@@ -5,11 +5,6 @@ import Link from "next/link";
 import {
   Badge,
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Skeleton,
   Table,
   TableBody,
@@ -61,18 +56,20 @@ export function SolicitudesTable() {
     <div className="flex flex-col gap-4">
       <SolicitudesStats countsByEstado={countsByEstado} />
 
-      <Card>
-        <CardHeader className="flex-row items-center justify-between border-b [.border-b]:pb-4">
+      <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div>
-            <CardTitle className="font-display text-base">Solicitudes</CardTitle>
-            <CardDescription className="mt-0.5">
+            <h2 className="font-display text-base font-bold tracking-tight text-navy-900">
+              Solicitudes
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
               {totalGeneral} expediente{totalGeneral === 1 ? "" : "s"} registrado
               {totalGeneral === 1 ? "" : "s"}
-            </CardDescription>
+            </p>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 p-5">
           <SolicitudesFilters
             estado={estado}
             onEstadoChange={setEstado}
@@ -98,7 +95,7 @@ export function SolicitudesTable() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableRow className="bg-slate-50 hover:bg-slate-50">
                     <TableHead className="text-xs uppercase">Expediente</TableHead>
                     <TableHead className="text-xs uppercase">Solicitante</TableHead>
                     <TableHead className="text-xs uppercase">Causal</TableHead>
@@ -110,7 +107,7 @@ export function SolicitudesTable() {
                 </TableHeader>
                 <TableBody>
                   {solicitudes.map((s) => (
-                    <TableRow key={s.id} className="hover:bg-muted/30">
+                    <TableRow key={s.id} className="hover:bg-slate-50/70">
                       <TableCell>
                         <Link
                           href={`/admin/solicitudes/${s.id}`}
@@ -209,8 +206,8 @@ export function SolicitudesTable() {
               onPageChange={setPage}
             />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {revisionSolicitudId && (
         <IniciarRevisionModal

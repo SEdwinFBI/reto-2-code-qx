@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { SolicitudesTable } from "@/features/admin-review";
 
 export default function AdminSolicitudesPage() {
-  return <SolicitudesTable />;
+  return (
+    <Suspense>
+      <SolicitudesTable />
+    </Suspense>
+  );
 }

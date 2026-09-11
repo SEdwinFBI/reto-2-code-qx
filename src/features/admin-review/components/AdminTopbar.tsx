@@ -13,8 +13,8 @@ export function AdminTopbar({ title = "Solicitudes" }: { title?: string }) {
   const { logout } = useAdminAuth();
 
   return (
-    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-border bg-white px-6">
-      <h1 className="font-display text-lg font-semibold text-foreground">{title}</h1>
+    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-6 shadow-xs backdrop-blur-md">
+      <h1 className="font-display text-lg font-bold tracking-tight text-navy-900">{title}</h1>
 
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted">
