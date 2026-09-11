@@ -159,9 +159,6 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Consulta de demostración: se rellenarán datos ficticios.
-              </p>
               <Button type="submit">Consultar</Button>
             </div>
           </fieldset>
