@@ -3,11 +3,15 @@
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ChevronDown, RotateCcw, Send, Sparkles } from "lucide-react";
+import { ChevronDown, Mic, RotateCcw, Send, Sparkles, Square } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { ChatSuggestions } from "./ChatSuggestions";
 import { ChatMessage } from "../types";
+import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
+import { cn } from "@/lib/utils";
+import { Boxes } from "@/components/ui/background-boxes";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
 interface ChatEmbeddedSectionProps {
   messages: ChatMessage[];
@@ -36,6 +40,9 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
   const sectionRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastMessagesRef = useRef(messages);
+  const { isListening, isSupported: canListen, toggleListening } = useSpeechRecognition({
+    onResult: (transcript) => setInputText(transcript),
+  });
 
   useEffect(() => {
     const node = sectionRef.current;
@@ -70,6 +77,7 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
       ref={sectionRef}
       className="relative overflow-hidden py-3 sm:py-5 bg-gradient-to-b from-white via-gold-50/40 to-slate-50/70"
     >
+       <BackgroundBeams />
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-2">
@@ -162,11 +170,28 @@ export const ChatEmbeddedSection: React.FC<ChatEmbeddedSectionProps> = ({
                 enterKeyHint="send"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Escribe tu pregunta aquí..."
+                placeholder={isListening ? "Escuchando..." : "Escribe tu pregunta aquí..."}
                 disabled={isLoading}
                 className="w-full pl-4 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-600 focus:bg-white focus:ring-2 focus:ring-brand-600/20 transition-all text-slate-800 placeholder:text-slate-400 disabled:opacity-50"
               />
             </div>
+            {canListen && (
+              <button
+                type="button"
+                onClick={toggleListening}
+                disabled={isLoading}
+                title={isListening ? "Detener dictado" : "Dictar por voz"}
+                aria-label={isListening ? "Detener dictado" : "Dictar por voz"}
+                className={cn(
+                  "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 shadow-xs cursor-pointer disabled:opacity-40",
+                  isListening
+                    ? "bg-red-500 text-white hover:bg-red-600 animate-pulse"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                )}
+              >
+                {isListening ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
+            )}
             <button
               type="submit"
               disabled={!inputText.trim() || isLoading}

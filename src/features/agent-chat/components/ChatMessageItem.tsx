@@ -2,9 +2,10 @@ import React from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { Shield, Bot, Loader2 } from "lucide-react";
+import { Shield, Bot, Loader2, Volume2, VolumeX } from "lucide-react";
 import { ChatMessage } from "../types";
 import { cn } from "@/lib/utils";
+import { useSpeechSynthesis } from "../hooks/useSpeechSynthesis";
 
 /**
  * The agent replies using WhatsApp-style single-asterisk emphasis (*texto*) to mean
@@ -24,6 +25,20 @@ const ARTIFACT_PATTERNS = ["<｜DSML｜function_calls"];
 
 function stripKnownArtifacts(text: string): string {
   return ARTIFACT_PATTERNS.reduce((acc, pattern) => acc.split(pattern).join(""), text);
+}
+
+/** Reduces the agent's markdown reply to plain, speakable text for the "listen" button. */
+function stripMarkdownForSpeech(text: string): string {
+  return text
+    .replace(/\*\*?([^*\n]+?)\*\*?/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, "enlace")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^[-*]\s+/gm, "")
+    .replace(/^\d+\.\s+/gm, "")
+    .replace(/\n{2,}/g, ". ")
+    .replace(/\n/g, " ")
+    .trim();
 }
 
 interface MarkdownBoundaryState {
@@ -88,6 +103,13 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
   const isUser = message.sender === "user";
   const displayText = isUser ? message.text : stripKnownArtifacts(message.text);
   const isEmptyStreamingPlaceholder = displayText.length === 0 && message.isStreaming;
+  const { speak, stop, isSpeaking, isSupported: canSpeak } = useSpeechSynthesis();
+  const canReadAloud = !isUser && !isEmptyStreamingPlaceholder && !message.isStreaming && canSpeak;
+
+  const handleToggleSpeak = () => {
+    if (isSpeaking) stop();
+    else speak(stripMarkdownForSpeech(displayText));
+  };
 
   return (
     <div
@@ -134,11 +156,24 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
 
         <div
           className={cn(
-            "text-[10px] mt-1 text-right",
-            isUser ? "text-blue-200" : "text-slate-400"
+            "flex items-center mt-1 gap-1.5",
+            isUser ? "justify-end" : "justify-between"
           )}
         >
-          {message.timestamp}
+          {canReadAloud && (
+            <button
+              type="button"
+              onClick={handleToggleSpeak}
+              title={isSpeaking ? "Detener lectura" : "Escuchar respuesta"}
+              aria-label={isSpeaking ? "Detener lectura" : "Escuchar respuesta"}
+              className="p-1 -ml-1 rounded-md text-slate-400 hover:text-brand-600 hover:bg-brand-100/60 transition-colors cursor-pointer"
+            >
+              {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+            </button>
+          )}
+          <div className={cn("text-[10px]", isUser ? "text-blue-200" : "text-slate-400")}>
+            {message.timestamp}
+          </div>
         </div>
       </div>
 
