@@ -12,11 +12,7 @@ export async function fetchTrackerStatus(token: string): Promise<TrackerStatus> 
   return (await response.json()) as TrackerStatus;
 }
 
-/**
- * Solo devuelve una URL cuando la solicitud está APROBADA y ya tiene un
- * documento de resolución cargado; en cualquier otro caso el endpoint
- * responde 403/404 y esta función devuelve null en vez de lanzar.
- */
+// Obtiene el documento de resolución si la solicitud está aprobada.
 export async function fetchTrackerDocumento(
   token: string
 ): Promise<TrackerDocumento | null> {
