@@ -8,6 +8,8 @@ import { PasosSection } from "./PasosSection";
 import { SedesSection } from "./SedesSection";
 import { FaqSection } from "./FaqSection";
 import { Footer } from "./Footer";
+import { KicheDisclaimerBanner } from "./KicheDisclaimerBanner";
+import { LanguageProvider } from "../i18n/LanguageContext";
 
 // Cross-feature imports strictly from public APIs (index.ts) as required by AGENTS.md
 import {
@@ -54,7 +56,11 @@ export const LandingContainer: React.FC = () => {
   } = useSolicitud();
 
   return (
+    <LanguageProvider>
     <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-blue-100 selection:text-blue-900">
+      {/* K'iche' preliminary-translation notice — only visible in that locale */}
+      <KicheDisclaimerBanner />
+
       {/* Header Navigation */}
       <Header
         onOpenSolicitud={openSolicitud}
@@ -122,5 +128,6 @@ export const LandingContainer: React.FC = () => {
         hideForSection={isChatSectionVisible}
       />
     </div>
+    </LanguageProvider>
   );
 };

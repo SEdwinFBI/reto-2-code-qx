@@ -6,6 +6,8 @@ import { FileText, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "../i18n/LanguageContext";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface HeaderProps {
   onOpenSolicitud: () => void;
@@ -13,6 +15,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) => {
+  const { dict } = useLanguage();
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
 
@@ -50,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
           <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-gold-500/70 shadow-sm shrink-0">
             <Image
               src="/images.jpg"
-              alt="Escudo Nacional de Guatemala"
+              alt={dict.common.nationalEmblemAlt}
               fill
               sizes="48px"
               className="object-cover"
@@ -58,10 +61,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
           </div>
           <div className="min-w-0">
             <h1 className="font-display text-sm sm:text-lg font-bold text-navy-900 tracking-tight leading-tight truncate">
-              Exoneración de Multas de Tránsito
+              {dict.header.title}
             </h1>
             <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate">
-              Policía Nacional Civil · Guatemala C.A.
+              {dict.header.subtitle}
             </p>
           </div>
         </div>
@@ -75,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
             className="hidden md:inline-flex bg-brand-50/40 hover:bg-brand-50 border-brand-200 text-brand-600 font-medium"
           >
             <FileText className="w-4 h-4" />
-            <span>Llenar solicitud de exoneración</span>
+            <span>{dict.header.solicitudButton}</span>
           </Button>
 
           <MagneticButton strength={0.3} maxDistance={20}>
@@ -85,10 +88,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
               className="font-medium shadow-xs cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
-              <span className="hidden sm:inline">Chatear con el Asistente</span>
-              <span className="sm:hidden">Asistente</span>
+              <span className="hidden sm:inline">{dict.header.chatButton}</span>
+              <span className="sm:hidden">{dict.header.chatButtonShort}</span>
             </Button>
           </MagneticButton>
+
+          <LanguageSwitcher />
         </div>
       </div>
     </header>

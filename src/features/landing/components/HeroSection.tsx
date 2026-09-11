@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Highlight } from "@/components/ui/hero-highlight";
+import { useLanguage } from "../i18n/LanguageContext";
+import { RichText } from "../i18n/RichText";
 
 const textContainer: Variants = {
   hidden: {},
@@ -37,6 +39,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenSolicitud,
   onOpenChat,
 }) => {
+  const { dict } = useLanguage();
   return (
     <section className="relative overflow-hidden pt-6 pb-8 sm:pt-8 sm:pb-10 bg-linear-to-b from-blue-50/40 via-white to-white">
       <BackgroundRippleEffect rows={13} cols={34} cellSize={48} />
@@ -54,7 +57,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5 text-gold-800" />
           <span className="text-xs font-semibold text-gold-800 tracking-wide">
-            Acuerdo Gubernativo 59-2012
+            {dict.hero.eyebrow}
           </span>
         </motion.div>
 
@@ -63,10 +66,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           variants={textItem}
           className="font-display text-3xl sm:text-5xl lg:text-5xl font-bold text-navy-900 tracking-tight leading-[1.15] mb-3"
         >
-          ¿Tu licencia venció por fuerza mayor? <br />
+          {dict.hero.headingLine1} <br />
           <Highlight
           className="text-white">
-          No pagues la multa: exonérala al 100%.
+          {dict.hero.headingLine2}
           </Highlight>
         </motion.h2>
 
@@ -75,10 +78,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           variants={textItem}
           className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-4 leading-relaxed font-normal"
         >
-          Averigua en <strong className="font-semibold text-slate-900">en menos de 2 minutos</strong> si tu caso
-          califica por ley, la casilla exacta a marcar en el{" "}
-          <strong className="font-semibold text-slate-900">Formulario DT-AJ-001</strong> y los documentos
-          que necesitas llevar a ventanilla.
+          <RichText text={dict.hero.subtitle} />
         </motion.p>
 
 
@@ -103,9 +103,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             />
             <div className="relative z-10">
               <div className="font-display text-2xl sm:text-3xl font-bold text-navy-900 mb-1">
-                Q0.00
+                {dict.hero.stat1Value}
               </div>
-              <div className="text-xs font-medium text-slate-500">Costo del trámite</div>
+              <div className="text-xs font-medium text-slate-500">{dict.hero.stat1Caption}</div>
             </div>
           </div>
 
@@ -122,9 +122,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             />
             <div className="relative z-10">
               <div className="font-display text-2xl sm:text-3xl font-bold text-navy-900 mb-1">
-                Hasta Q300
+                {dict.hero.stat2Value}
               </div>
-              <div className="text-xs font-medium text-slate-500">Ahorro en multa</div>
+              <div className="text-xs font-medium text-slate-500">{dict.hero.stat2Caption}</div>
             </div>
           </div>
 
@@ -141,9 +141,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             />
             <div className="relative z-10">
               <div className="font-display text-2xl sm:text-3xl font-bold text-navy-900 mb-1">
-                20 Días
+                {dict.hero.stat3Value}
               </div>
-              <div className="text-xs font-medium text-slate-500">Plazo legal resolución</div>
+              <div className="text-xs font-medium text-slate-500">{dict.hero.stat3Caption}</div>
             </div>
           </div>
         </motion.div>
@@ -160,14 +160,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-navy-900">
-                  Llenar Solicitud en Línea
+                  {dict.hero.calloutTitle}
                 </span>
                 <Badge variant="green" className="text-[10px] py-0 px-2 font-bold">
-                  Nuevo
+                  {dict.hero.calloutBadge}
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Ingresa tu CUI, datos personales y adjunta tus 3 requisitos digitales.
+                {dict.hero.calloutDescription}
               </p>
             </div>
           </div>
@@ -176,7 +176,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             onClick={onOpenSolicitud}
             className="w-full sm:w-auto shrink-0 font-semibold gap-2 shadow-xs cursor-pointer"
           >
-            <span>Iniciar Trámite</span>
+            <span>{dict.hero.ctaButton}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </motion.div>
