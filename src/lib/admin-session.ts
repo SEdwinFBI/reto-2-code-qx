@@ -15,11 +15,7 @@ function toHex(buffer: ArrayBuffer): string {
     .join("");
 }
 
-/**
- * HMAC-SHA256 vía Web Crypto (SubtleCrypto), disponible tanto en Node.js
- * como en el Edge Runtime que usa middleware.ts — a diferencia del módulo
- * `crypto` de Node, que no corre en Edge.
- */
+// Firma HMAC-SHA256 con Web Crypto compatible con Edge y Node.js.
 async function sign(payload: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -41,11 +37,7 @@ function timingSafeEqual(a: string, b: string): boolean {
   return result === 0;
 }
 
-/**
- * Sesión de administrador simulada para demo: credenciales fijas por env var
- * y cookie firmada con HMAC (sin librería de JWT ni almacén de sesión).
- * Explícitamente reemplazable por autenticación real más adelante.
- */
+// Token de sesión firmado para autenticación del panel administrativo.
 export async function createSessionToken(): Promise<string> {
   const expiry = Date.now() + SESSION_TTL_MS;
   const payload = `admin:${expiry}`;

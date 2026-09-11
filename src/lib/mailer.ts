@@ -34,12 +34,7 @@ const BRAND_NAME = "Tránsito PNC Guatemala";
 const BRAND_COLOR = "#1e3a5f";
 const ACCENT_COLOR = "#c62828";
 
-/**
- * Envuelve el contenido de cada correo en un layout HTML de ancho fijo con
- * estilos inline, compatible con la mayoría de clientes de correo (sin
- * flexbox/grid ni CSS externo). `ctaHref`/`ctaLabel` son opcionales: cuando
- * se omiten, no se renderiza el botón.
- */
+// Genera la plantilla HTML base con estilos inline para correos.
 function renderEmailLayout(params: {
   title: string;
   preheader: string;

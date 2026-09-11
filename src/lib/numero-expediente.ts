@@ -1,10 +1,6 @@
 import { prisma, type PrismaTransactionClient } from "@/lib/prisma";
 
-/**
- * Genera el siguiente numeroExpediente de forma segura ante concurrencia,
- * usando la fila única de la tabla Sequence como contador transaccional.
- * Formato: EXP-PNC-{AÑO}-{6 dígitos}.
- */
+// Genera número correlativo de expediente transaccional (EXP-PNC-YYYY-000001).
 export async function generateNumeroExpediente(): Promise<string> {
   const year = new Date().getFullYear();
 

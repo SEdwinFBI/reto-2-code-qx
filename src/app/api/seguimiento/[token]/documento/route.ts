@@ -6,13 +6,7 @@ export const runtime = "nodejs";
 
 type RouteParams = { params: Promise<{ token: string }> };
 
-/**
- * Endpoint público (sin autenticación) para que el ciudadano descargue el
- * documento de resolución/exoneración de su solicitud, usando el token
- * opaco de seguimiento. Solo responde con una URL cuando la solicitud está
- * APROBADA y tiene un archivo de resolución cargado por el admin; en
- * cualquier otro caso no revela nada del estado ni de los archivos.
- */
+// Descarga pública del documento de resolución si la solicitud está aprobada.
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { token } = await params;
 

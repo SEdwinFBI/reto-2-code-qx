@@ -8,11 +8,7 @@ const PLAZO_DIAS_HABILES = 20;
 
 type RouteParams = { params: Promise<{ token: string }> };
 
-/**
- * Endpoint público (sin autenticación) para que el ciudadano consulte el
- * estado de su solicitud usando el token opaco de seguimiento.
- * Nunca devuelve CUI completo, teléfono, URLs de archivos, ni datos del gestor.
- */
+// Consulta pública del estado de una solicitud mediante token.
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { token } = await params;
 

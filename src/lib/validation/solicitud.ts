@@ -6,10 +6,7 @@ export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 const causalEnum = z.enum(CAUSAL_KEYS as [string, ...string[]]);
 
-/**
- * Validación del cuerpo (campos, no archivos) de una solicitud de exoneración.
- * Compartida entre el Route Handler y, eventualmente, el wizard cliente.
- */
+// Esquema de validación Zod para solicitudes de exoneración.
 export const solicitudFormSchema = z
   .object({
     cui: z.string().regex(/^\d{13}$/, "CUI debe tener 13 dígitos"),

@@ -1,9 +1,4 @@
-/**
- * Fuente única de verdad para las 3 causales de exoneración de multas.
- * Las llaves coinciden exactamente con el enum `CausalTramite` de Prisma.
- * Consumido tanto por el wizard público (src/features/solicitud) como por
- * el panel administrativo (src/features/admin-review).
- */
+// Catálogo central de las 3 causales de exoneración (Acuerdo Gubernativo 59-2012).
 export const CAUSALES = {
   FUERA_DEL_PAIS: {
     codigoFormulario: "24",
