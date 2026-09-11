@@ -71,7 +71,7 @@ function extensionFromContentType(contentType: string): string {
 
 export function buildSolicitudFilePath(
   numeroExpediente: string,
-  role: "dpi" | "comprobante" | "autorizacion",
+  role: "dpi" | "comprobante" | "autorizacion" | "resolucion",
   contentType: string
 ): string {
   return `solicitudes/${numeroExpediente}/${role}.${extensionFromContentType(contentType)}`;

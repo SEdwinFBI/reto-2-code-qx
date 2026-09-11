@@ -74,6 +74,14 @@ model Solicitud {
   autorizacionSizeBytes    Int?
   autorizacionUploadedAt   DateTime?
 
+  // Documento de resolución / exoneración — subido por el admin al aprobar.
+  // Solo se expone al ciudadano vía /seguimiento cuando estado = APROBADA.
+  resolucionStoragePath  String?
+  resolucionOriginalName String?
+  resolucionContentType  String?
+  resolucionSizeBytes    Int?
+  resolucionUploadedAt   DateTime?
+
   estado        EstadoSolicitud @default(PENDIENTE)
   motivoRechazo String?
   notaRevisor   String?

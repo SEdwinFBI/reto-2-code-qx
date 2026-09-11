@@ -56,6 +56,8 @@ export interface SolicitudDetail {
   comprobanteOriginalName: string;
   autorizacionUrl: string | null;
   autorizacionOriginalName: string | null;
+  resolucionUrl: string | null;
+  resolucionOriginalName: string | null;
 
   estado: EstadoSolicitud;
   motivoRechazo: string | null;
@@ -70,3 +72,18 @@ export interface SolicitudDetail {
 }
 
 export type SolicitudAccion = "iniciar_revision" | "aprobar" | "rechazar";
+
+export interface FetchSolicitudesParams {
+  estado?: EstadoSolicitud;
+  q?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface FetchSolicitudesResult {
+  solicitudes: SolicitudListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  countsByEstado: Partial<Record<EstadoSolicitud, number>>;
+}

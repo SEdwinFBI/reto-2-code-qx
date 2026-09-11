@@ -1,19 +1,26 @@
 import { readErrorMessage } from "@/lib/http";
 import type {
-  EstadoSolicitud,
+  FetchSolicitudesParams,
+  FetchSolicitudesResult,
   SolicitudAccion,
   SolicitudDetail,
-  SolicitudListItem,
 } from "../types";
 
-export async function fetchSolicitudes(estado?: EstadoSolicitud): Promise<SolicitudListItem[]> {
-  const url = estado ? `/api/solicitudes?estado=${estado}` : "/api/solicitudes";
-  const response = await fetch(url);
+export async function fetchSolicitudes(
+  params: FetchSolicitudesParams = {}
+): Promise<FetchSolicitudesResult> {
+  const searchParams = new URLSearchParams();
+  if (params.estado) searchParams.set("estado", params.estado);
+  if (params.q) searchParams.set("q", params.q);
+  if (params.page) searchParams.set("page", String(params.page));
+  if (params.pageSize) searchParams.set("pageSize", String(params.pageSize));
+
+  const query = searchParams.toString();
+  const response = await fetch(`/api/solicitudes${query ? `?${query}` : ""}`);
   if (!response.ok) {
     throw new Error(await readErrorMessage(response, "No se pudo cargar el listado."));
   }
-  const data = await response.json();
-  return data.solicitudes as SolicitudListItem[];
+  return (await response.json()) as FetchSolicitudesResult;
 }
 
 export async function fetchSolicitudDetail(id: string): Promise<SolicitudDetail> {
@@ -27,12 +34,17 @@ export async function fetchSolicitudDetail(id: string): Promise<SolicitudDetail>
 export async function ejecutarAccion(
   id: string,
   accion: SolicitudAccion,
-  extra?: { motivoRechazo?: string; nota?: string }
+  extra?: { motivoRechazo?: string; nota?: string; archivoResolucion?: File }
 ): Promise<SolicitudDetail> {
+  const formData = new FormData();
+  formData.set("accion", accion);
+  if (extra?.motivoRechazo) formData.set("motivoRechazo", extra.motivoRechazo);
+  if (extra?.nota) formData.set("nota", extra.nota);
+  if (extra?.archivoResolucion) formData.set("archivoResolucion", extra.archivoResolucion);
+
   const response = await fetch(`/api/solicitudes/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accion, ...extra }),
+    body: formData,
   });
   if (!response.ok) {
     throw new Error(await readErrorMessage(response, "No se pudo ejecutar la acción."));

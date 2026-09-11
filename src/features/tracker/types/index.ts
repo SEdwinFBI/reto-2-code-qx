@@ -11,3 +11,8 @@ export interface TrackerStatus {
   fechaRadicacion: string;
   plazoDiasHabiles: number;
 }
+
+export interface TrackerDocumento {
+  url: string;
+  nombreArchivo: string | null;
+}

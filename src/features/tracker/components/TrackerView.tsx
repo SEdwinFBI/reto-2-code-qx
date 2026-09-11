@@ -1,7 +1,8 @@
 "use client";
 
-import { Card, Badge } from "@/components/ui";
+import { Button, Card, Badge } from "@/components/ui";
 import { useTrackerStatus } from "../hooks/useTrackerStatus";
+import { useTrackerDocumento } from "../hooks/useTrackerDocumento";
 
 const ESTADO_LABELS: Record<string, string> = {
   PENDIENTE: "Pendiente de revisión",
@@ -12,6 +13,10 @@ const ESTADO_LABELS: Record<string, string> = {
 
 export function TrackerView({ token }: { token: string }) {
   const { status, isLoading, error } = useTrackerStatus(token);
+  const { documento, isLoading: isLoadingDocumento } = useTrackerDocumento(
+    token,
+    status?.estado === "APROBADA"
+  );
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Consultando estado…</p>;
@@ -42,6 +47,26 @@ export function TrackerView({ token }: { token: string }) {
         <p className="text-sm text-muted-foreground">
           Plazo estimado de resolución: {status.plazoDiasHabiles} días hábiles.
         </p>
+      )}
+      {status.estado === "APROBADA" && (
+        <>
+          {isLoadingDocumento && (
+            <p className="text-sm text-muted-foreground">Preparando documento…</p>
+          )}
+          {!isLoadingDocumento && documento && (
+            <Button
+              className="w-fit"
+              onClick={() => window.open(documento.url, "_blank", "noopener,noreferrer")}
+            >
+              Descargar documento de exoneración
+            </Button>
+          )}
+          {!isLoadingDocumento && !documento && (
+            <p className="text-sm text-muted-foreground">
+              El documento aún no está disponible. Intente más tarde.
+            </p>
+          )}
+        </>
       )}
     </Card>
   );
