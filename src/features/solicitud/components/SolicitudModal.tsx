@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SolicitudFormData, SolicitudResult, CausalTipo } from "../types";
 import { CAUSALES } from "@/lib/causales";
+import { DpiSerieHelp } from "./DpiSerieHelp";
 
 interface SolicitudModalProps {
   isOpen: boolean;
@@ -143,7 +144,8 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
                 onChange={(e) => updateField("fechaNacimiento", e.target.value)}
                 required
               />
-              <FormInput
+              <div className="space-y-2">
+                <FormInput
                 label="Últimos 4 dígitos de serie"
                 type="text"
                 inputMode="numeric"
@@ -153,6 +155,8 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
                 onChange={(e) => updateField("serie", e.target.value)}
                 required
               />
+                <DpiSerieHelp />
+              </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
