@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { stopActiveMic } from "./voiceChannel";
 
 function isSpeechSynthesisSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -32,6 +33,9 @@ export function useSpeechSynthesis(lang = "es-GT") {
     (text: string) => {
       if (!isSpeechSynthesisSupported() || !text.trim()) return;
       window.speechSynthesis.cancel();
+      // Voice input and voice output are mutually exclusive — reading a reply
+      // aloud stops the mic if it's currently listening.
+      stopActiveMic();
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang;
