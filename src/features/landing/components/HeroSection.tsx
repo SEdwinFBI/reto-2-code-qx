@@ -44,7 +44,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         variants={textContainer}
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
       >
         {/* Pill Tag */}
         <motion.div

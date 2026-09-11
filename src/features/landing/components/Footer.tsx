@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Shield } from "lucide-react";
+import Image from "next/image";
 
 export const Footer: React.FC = () => {
   return (
@@ -10,8 +10,14 @@ export const Footer: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           {/* Brand Info */}
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-full bg-navy-950 border border-gold-500/50 flex items-center justify-center text-white shrink-0 shadow-inner">
-              <Shield className="w-6 h-6 text-gold-100" />
+            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-gold-500/50 shrink-0 shadow-inner">
+              <Image
+                src="/images.jpg"
+                alt="Escudo Nacional de Guatemala"
+                fill
+                sizes="44px"
+                className="object-cover"
+              />
             </div>
             <div>
               <h5 className="font-display text-sm font-bold text-white tracking-tight">

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Shield, FileText, MessageSquare } from "lucide-react";
+import Image from "next/image";
+import { FileText, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
@@ -16,8 +17,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSolicitud, onOpenChat }) =
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand / Emblem */}
         <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
-          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-navy-900 border-2 border-gold-500/70 flex items-center justify-center text-white shadow-sm shrink-0">
-            <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-gold-100" />
+          <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-gold-500/70 shadow-sm shrink-0">
+            <Image
+              src="/images.jpg"
+              alt="Escudo Nacional de Guatemala"
+              fill
+              sizes="48px"
+              className="object-cover"
+            />
           </div>
           <div className="min-w-0">
             <h1 className="font-display text-sm sm:text-lg font-bold text-navy-900 tracking-tight leading-tight truncate">

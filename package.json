@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-agentcore": "^3.1129.0",
     "@base-ui/react": "^1.8.0",
+    "@lottiefiles/dotlottie-react": "^0.19.16",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@react-three/fiber": "^9.7.0",

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Header } from "./Header";
 import { HeroSection } from "./HeroSection";
 import { CausalesSection } from "./CausalesSection";
@@ -20,18 +20,11 @@ import { useSolicitud, SolicitudModal } from "@/features/solicitud";
 
 export const LandingContainer: React.FC = () => {
   const [isChatSectionVisible, setIsChatSectionVisible] = useState(true);
-  const chatSectionAnchorRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLDivElement>(null);
 
-  // Let the hero's text entrance animation finish (~1s) before guiding the
-  // visitor down to the chat section, instead of yanking the page on load.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (window.scrollY < 40) {
-        chatSectionAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 2300);
-    return () => clearTimeout(timer);
-  }, []);
+  const scrollToHero = () => {
+    heroSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const {
     isOpen: isChatOpen,
@@ -70,19 +63,20 @@ export const LandingContainer: React.FC = () => {
 
       {/* Main Page Sections */}
       <main className="flex-1">
-        <HeroSection
-          onOpenSolicitud={openSolicitud}
-          onOpenChat={() => setIsChatOpen(true)}
+        <ChatEmbeddedSection
+          messages={messages}
+          inputText={inputText}
+          setInputText={setInputText}
+          isLoading={isChatLoading}
+          onSendMessage={sendMessage}
+          onResetSession={resetSession}
+          onVisibilityChange={setIsChatSectionVisible}
+          onScrollDownInvite={scrollToHero}
         />
-        <div ref={chatSectionAnchorRef} className="scroll-mt-20">
-          <ChatEmbeddedSection
-            messages={messages}
-            inputText={inputText}
-            setInputText={setInputText}
-            isLoading={isChatLoading}
-            onSendMessage={sendMessage}
-            onResetSession={resetSession}
-            onVisibilityChange={setIsChatSectionVisible}
+        <div ref={heroSectionRef} className="scroll-mt-20">
+          <HeroSection
+            onOpenSolicitud={openSolicitud}
+            onOpenChat={() => setIsChatOpen(true)}
           />
         </div>
         <CausalesSection />

@@ -2,9 +2,13 @@
 
 import React from "react";
 import { motion } from "motion/react";
-import { MessageSquare, Shield } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { MessageSquare } from "lucide-react";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+
+const ASSISTANT_LOTTIE_SRC =
+  "https://lottie.host/6165cac7-604a-4f50-bfe7-f43641f6ad0f/kzt7y2RoGV.lottie";
 
 interface ChatFloatingButtonProps {
   onClick: () => void;
@@ -23,7 +27,7 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
   return (
     <div className="fixed z-40 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
       <motion.div
-        className="pointer-events-auto"
+        className="pointer-events-auto relative"
         initial={{ opacity: 0, scale: 0.5, y: 30 }}
         animate={{
           opacity: 1,
@@ -44,37 +48,36 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
         }}
       >
         <MagneticButton strength={0.4} maxDistance={30}>
-      
-          <HoverBorderGradient
-          color="red"
-            as="button"
-            onClick={onClick}
-            className="group flex items-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 cursor-pointer border border-brand-400/40 active:scale-95 whitespace-nowrap"
-            aria-label="Abrir Asistente Virtual PNC"
-          >
-            {/* Emblem Avatar with green dot */}
-            <div className="relative flex items-center justify-center">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-navy-900 border border-gold-500/50 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-gold-100" />
+          <div className="relative">
+            {/* Floating bot mascot, no frame/background — moves together with the button */}
+            <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-20 h-20 sm:w-24 sm:h-24">
+              <DotLottieReact src={ASSISTANT_LOTTIE_SRC} loop autoplay className="w-full h-full" />
+              <span className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full shadow-sm" />
+            </div>
+
+            <HoverBorderGradient
+            color="red"
+              as="button"
+              onClick={onClick}
+              className="group flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white pl-4 pr-4 py-2.5 sm:pl-5 sm:pr-5 sm:py-2.5 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 cursor-pointer border border-brand-400/40 active:scale-95 whitespace-nowrap"
+              aria-label="Abrir Asistente Virtual PNC"
+            >
+              {/* Text Labels */}
+              <div className="flex text-left flex-col">
+                <span className="font-display text-xs sm:text-sm font-bold leading-tight tracking-tight text-white">
+                  Asistente Virtual PNC
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-brand-100/90 leading-tight">
+                  Exonera tu multa online
+                </span>
               </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-brand-600 rounded-full" />
-            </div>
 
-            {/* Text Labels */}
-            <div className="flex text-left flex-col">
-              <span className="font-display text-xs sm:text-sm font-bold leading-tight tracking-tight text-white">
-                Asistente Virtual PNC
-              </span>
-              <span className="text-[10px] sm:text-[11px] text-brand-100/90 leading-tight">
-                Exonera tu multa online
-              </span>
-            </div>
-
-            {/* Chat icon */}
-            <div className="ml-0.5 text-white/90">
-              <MessageSquare className="w-4 h-4 fill-white/20" />
-            </div>
-          </HoverBorderGradient>
+              {/* Chat icon */}
+              <div className="ml-0.5 text-white/90">
+                <MessageSquare className="w-4 h-4 fill-white/20" />
+              </div>
+            </HoverBorderGradient>
+          </div>
         </MagneticButton>
       </motion.div>
     </div>

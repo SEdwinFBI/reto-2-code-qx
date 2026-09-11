@@ -24,6 +24,15 @@
     }
   }
 
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
   /* Institutional navy — the single brand-dark used for headings, header, footer and chat chrome */
   --color-navy-950: #071022;
   --color-navy-900: #0b1f3b;
