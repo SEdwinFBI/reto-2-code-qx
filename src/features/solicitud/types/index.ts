@@ -2,13 +2,10 @@ import type { CausalKey } from "@/lib/causales";
 
 export type CausalTipo = CausalKey;
 
+/** Estado de la simulación de consulta de identidad del paso 1. */
+export type ConsultaEstado = "idle" | "loading" | "encontrado" | "no-encontrado";
+
 export interface SolicitudFormData {
-  tramitaTercero: boolean;
-  terceroCui: string;
-  terceroNombreCompleto: string;
-  terceroParentesco: string;
-  terceroCorreo: string;
-  terceroTelefono: string;
   esTrabajadorPublico: boolean;
   solicitaAbogado: boolean;
   institucionYPuesto: string;
@@ -25,22 +22,23 @@ export interface SolicitudFormData {
   telefonoAlternativo: string;
   correo: string;
   causal: CausalTipo;
+  fechaVencimiento: string;
+  fechaHecho: string;
   numerosDocumento: string[];
   observaciones: string;
 
-  archivoDpi?: File | null;
-  archivoComprobante?: File | null;
-
-  /** Solo relevante si esGestionadoPorTercero es true. */
-  archivoAutorizacion?: File | null;
+  archivoDpi: File | null;
+  archivoComprobante: File | null;
+  /** Solo relevante/obligatorio si esGestionadoPorTercero es true. */
+  archivoAutorizacion: File | null;
 
   /** El trámite lo puede presentar el titular o un tercero (familiar/abogado/apoderado). */
   esGestionadoPorTercero: boolean;
-  gestorNombreCompleto?: string;
-  gestorCui?: string;
-  gestorRelacion?: string;
-  gestorTelefono?: string;
-  gestorCorreo?: string;
+  gestorNombreCompleto: string;
+  gestorCui: string;
+  gestorRelacion: string;
+  gestorTelefono: string;
+  gestorCorreo: string;
 
   /** Dato opcional del solicitante/gestor, no del revisor. */
   esEmpleadoGobierno: boolean;

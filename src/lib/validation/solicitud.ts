@@ -58,6 +58,57 @@ export const solicitudFormSchema = z
 
 export type SolicitudFormInput = z.infer<typeof solicitudFormSchema>;
 
+/**
+ * Validación del cuerpo de la consulta simulada de identidad (paso 1 del wizard).
+ * La `serie` del DPI se valida como 4 dígitos (ej. "1234").
+ */
+export const consultaPersonaSchema = z.object({
+  cui: z.string().regex(/^\d{13}$/, "CUI debe tener 13 dígitos"),
+  fechaNacimiento: z.string().min(1, "Fecha de nacimiento es obligatoria"),
+  serie: z.string().regex(/^\d{4}$/, "Serie inválida: debe ser 4 dígitos"),
+});
+
+export type ConsultaPersonaInput = z.infer<typeof consultaPersonaSchema>;
+
+/**
+ * Forma de cada perfil de prueba en src/data/perfiles-prueba.json, y por lo tanto de
+ * la respuesta exitosa de POST /api/consulta-persona. Refleja 1:1 los nombres de
+ * campo de SolicitudFormData (excepto los de archivo, que nunca se prerellenan).
+ */
+export interface PerfilPrueba {
+  id: string;
+  genero: string;
+  esTrabajadorPublico: boolean;
+  solicitaAbogado: boolean;
+  institucionYPuesto: string;
+  numeroColegiadoActivo: string;
+  cui: string;
+  fechaNacimiento: string;
+  serie: string;
+  nacionalidad: string;
+  numeroLicencia: string;
+  paisEmisionLicencia: string;
+  nombres: string;
+  apellidos: string;
+  telefono: string;
+  telefonoAlternativo: string;
+  correo: string;
+  causal: string;
+  fechaVencimiento: string;
+  fechaHecho: string;
+  numerosDocumento: string[];
+  observaciones: string;
+  esGestionadoPorTercero: boolean;
+  gestorNombreCompleto: string;
+  gestorCui: string;
+  gestorRelacion: string;
+  gestorTelefono: string;
+  gestorCorreo: string;
+  esEmpleadoGobierno: boolean;
+  empleadoPuesto: string;
+  empleadoInstitucion: string;
+}
+
 export function validateFile(
   file: File | null | undefined,
   { required, label }: { required: boolean; label: string }

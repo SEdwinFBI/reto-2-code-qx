@@ -21,20 +21,18 @@ async function requireAdmin(request: NextRequest): Promise<boolean> {
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  if (!(await requireAdmin(request))) {
-    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
-  }
-
-  const { id } = await params;
+/**
+ * Carga la solicitud con su historial y arma el mismo shape de `SolicitudDetail`
+ * (URLs firmadas incluidas) que consume el frontend, para usarse tanto en GET
+ * como tras un PATCH exitoso.
+ */
+async function loadSolicitudDetail(id: string) {
   const solicitud = await prisma.solicitud.findUnique({
     where: { id },
     include: { historial: { orderBy: { createdAt: "asc" } } },
   });
 
-  if (!solicitud) {
-    return NextResponse.json({ error: "Solicitud no encontrada." }, { status: 404 });
-  }
+  if (!solicitud) return null;
 
   const [dpiUrl, comprobanteUrl, autorizacionUrl, resolucionUrl] = await Promise.all([
     getSignedUrl(solicitud.dpiStoragePath),
@@ -47,13 +45,28 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       : Promise.resolve(null),
   ]);
 
-  return NextResponse.json({
+  return {
     ...solicitud,
     dpiUrl,
     comprobanteUrl,
     autorizacionUrl,
     resolucionUrl,
-  });
+  };
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  if (!(await requireAdmin(request))) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const detail = await loadSolicitudDetail(id);
+
+  if (!detail) {
+    return NextResponse.json({ error: "Solicitud no encontrada." }, { status: 404 });
+  }
+
+  return NextResponse.json(detail);
 }
 
 const TRANSITIONS: Record<string, EstadoSolicitud> = {
@@ -204,5 +217,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     });
   }
 
-  return NextResponse.json(updated);
+  const detail = await loadSolicitudDetail(id);
+  return NextResponse.json(detail);
 }
