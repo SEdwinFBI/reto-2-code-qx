@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   Loader2,
   AlertTriangle,
+  Mail,
 } from "lucide-react";
 import { ConsultaEstado, SolicitudFormData, SolicitudResult } from "../types";
 import { CAUSALES } from "@/lib/causales";
@@ -802,6 +803,11 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               Tu expediente ha sido recibido por la Sección de Asuntos Jurídicos - Tránsito PNC
             </p>
           </div>
+
+          <p className="text-xs text-slate-500 flex items-center justify-center gap-1.5">
+            <Mail className="w-3.5 h-3.5 text-brand-600 shrink-0" />
+            Te enviamos un correo con el enlace para dar seguimiento a tu trámite.
+          </p>
 
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left space-y-2 text-xs">
             <div className="flex justify-between border-b border-slate-200/70 pb-2">

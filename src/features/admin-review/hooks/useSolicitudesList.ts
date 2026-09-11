@@ -1,17 +1,47 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as solicitudesAdminService from "../services/solicitudesAdminService";
 import type { EstadoSolicitud, SolicitudListItem } from "../types";
 
 const DEFAULT_PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
+const DEFAULT_ESTADO: EstadoSolicitud | "TODAS" = "PENDIENTE";
 
-export function useSolicitudesList(initialEstado: EstadoSolicitud | "TODAS" = "PENDIENTE") {
-  const [estado, setEstadoState] = useState<EstadoSolicitud | "TODAS">(initialEstado);
-  const [search, setSearchState] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
+const ESTADOS_VALIDOS: (EstadoSolicitud | "TODAS")[] = [
+  "TODAS",
+  "PENDIENTE",
+  "EN_REVISION",
+  "APROBADA",
+  "RECHAZADA",
+];
+
+function parseEstadoParam(value: string | null): EstadoSolicitud | "TODAS" {
+  if (value && (ESTADOS_VALIDOS as string[]).includes(value)) {
+    return value as EstadoSolicitud | "TODAS";
+  }
+  return DEFAULT_ESTADO;
+}
+
+function parsePageParam(value: string | null): number {
+  const parsed = value ? Number.parseInt(value, 10) : 1;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+// Los filtros/búsqueda/página se sincronizan con la URL para que al volver desde el
+// detalle de una solicitud (botón "Volver") la lista se restaure tal como estaba.
+export function useSolicitudesList() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [estado, setEstadoState] = useState<EstadoSolicitud | "TODAS">(() =>
+    parseEstadoParam(searchParams.get("estado"))
+  );
+  const [search, setSearchState] = useState(() => searchParams.get("q") ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get("q") ?? "");
+  const [page, setPageState] = useState(() => parsePageParam(searchParams.get("page")));
   const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const [solicitudes, setSolicitudes] = useState<SolicitudListItem[]>([]);
@@ -25,10 +55,22 @@ export function useSolicitudesList(initialEstado: EstadoSolicitud | "TODAS" = "P
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedSearch(search.trim());
-      setPage(1);
+      setPageState(1);
     }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timeout);
   }, [search]);
+
+  // Refleja estado/búsqueda/página en la URL sin apilar entradas en el historial.
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (estado !== DEFAULT_ESTADO) params.set("estado", estado);
+    if (debouncedSearch) params.set("q", debouncedSearch);
+    if (page !== 1) params.set("page", String(page));
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo debe reaccionar a cambios de filtros
+  }, [estado, debouncedSearch, page, pathname]);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,9 +107,10 @@ export function useSolicitudesList(initialEstado: EstadoSolicitud | "TODAS" = "P
 
   const setEstado = useCallback((next: EstadoSolicitud | "TODAS") => {
     setEstadoState(next);
-    setPage(1);
+    setPageState(1);
   }, []);
   const setSearch = useCallback((next: string) => setSearchState(next), []);
+  const setPage = useCallback((next: number) => setPageState(next), []);
   const reload = useCallback(() => setReloadIndex((n) => n + 1), []);
 
   return {

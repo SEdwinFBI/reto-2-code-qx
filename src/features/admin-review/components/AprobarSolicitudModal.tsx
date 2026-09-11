@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button, Modal } from "@/components/ui";
-import { CAUSALES } from "@/lib/causales";
 import { useSolicitudDetail } from "../hooks/useSolicitudDetail";
+import { SolicitudResumen } from "./SolicitudResumen";
 
 interface AprobarSolicitudModalProps {
   solicitudId: string;
@@ -36,8 +36,6 @@ export function AprobarSolicitudModal({
     }
   }
 
-  const causalInfo = solicitud ? CAUSALES[solicitud.causal] : null;
-
   return (
     <Modal
       isOpen
@@ -48,62 +46,18 @@ export function AprobarSolicitudModal({
       {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {solicitud && causalInfo && (
+      {solicitud && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1 rounded-lg border border-border bg-muted/40 p-3">
-            <h3 className="text-sm font-semibold text-foreground">Titular</h3>
-            <p className="text-sm text-muted-foreground">
-              {solicitud.nombres} {solicitud.apellidos} — CUI {solicitud.cui}
-            </p>
-            <p className="text-sm text-muted-foreground">Teléfono: {solicitud.telefono}</p>
-            <p className="text-sm text-muted-foreground">Correo: {solicitud.correo}</p>
-          </div>
+          <SolicitudResumen solicitud={solicitud} />
 
-          <div className="flex flex-col gap-1 rounded-lg border border-border bg-muted/40 p-3">
-            <h3 className="text-sm font-semibold text-foreground">Causal invocada</h3>
-            <p className="text-sm text-muted-foreground">
-              {causalInfo.titulo} ({causalInfo.casilla}, GAE {causalInfo.gae})
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-muted/40 p-3">
-            <h3 className="text-sm font-semibold text-foreground">Documentos adjuntos</h3>
-            <a
-              href={solicitud.dpiUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-brand-600 underline underline-offset-2 hover:text-brand-700"
-            >
-              DPI — {solicitud.dpiOriginalName}
-            </a>
-            <a
-              href={solicitud.comprobanteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-brand-600 underline underline-offset-2 hover:text-brand-700"
-            >
-              Comprobante — {solicitud.comprobanteOriginalName}
-            </a>
-            {solicitud.autorizacionUrl && (
-              <a
-                href={solicitud.autorizacionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-brand-600 underline underline-offset-2 hover:text-brand-700"
-              >
-                Autorización / carta poder — {solicitud.autorizacionOriginalName}
-              </a>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1 rounded-lg border border-border bg-muted/40 p-3">
-            <label className="text-sm font-semibold text-foreground" htmlFor="archivoResolucion">
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <label className="text-sm font-medium text-navy-900" htmlFor="archivoResolucion">
               Documento de resolución/exoneración
               <span className="text-red-600" aria-hidden="true">
                 *
               </span>
             </label>
-            <p className="text-xs text-muted-foreground">
+            <p className="mt-0.5 text-xs text-slate-500">
               Imagen (JPG/PNG) o PDF escaneado, máximo 5 MB.
             </p>
             <input
@@ -111,7 +65,7 @@ export function AprobarSolicitudModal({
               type="file"
               accept="application/pdf,image/jpeg,image/png"
               onChange={(e) => setArchivoResolucion(e.target.files?.[0] ?? null)}
-              className="text-sm"
+              className="mt-2 text-sm"
             />
           </div>
 
