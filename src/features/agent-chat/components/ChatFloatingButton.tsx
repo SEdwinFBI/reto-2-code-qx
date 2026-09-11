@@ -25,7 +25,7 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
   if (isOpen || hideForSection) return null;
 
   return (
-    <div className="fixed z-40 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
+    <div className="fixed z-[80] bottom-[calc(5.25rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
       <motion.div
         className="pointer-events-auto relative"
         initial={{ opacity: 0, scale: 0.5, y: 30 }}

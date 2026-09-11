@@ -2,10 +2,12 @@
 
 import React, { useRef, useEffect } from "react";
 import Image from "next/image";
-import { RotateCcw, X, Send } from "lucide-react";
+import { RotateCcw, X, Send, Mic, Square } from "lucide-react";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { ChatSuggestions } from "./ChatSuggestions";
 import { ChatMessage } from "../types";
+import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
+import { cn } from "@/lib/utils";
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -30,6 +32,9 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isListening, isSupported: canListen, toggleListening } = useSpeechRecognition({
+    onResult: (transcript) => setInputText(transcript),
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,7 +63,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
       {/* Semi-transparent Backdrop for centered modal */}
       <div
         className="fixed inset-0 bg-navy-950/60 backdrop-blur-xs transition-opacity"
@@ -147,11 +152,28 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
               enterKeyHint="send"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Pregunta algo o responde..."
+              placeholder={isListening ? "Escuchando..." : "Pregunta algo o responde..."}
               disabled={isLoading}
               className="w-full pl-4 pr-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-600 focus:bg-white focus:ring-2 focus:ring-brand-600/20 transition-all text-slate-800 placeholder:text-slate-400 disabled:opacity-50"
             />
           </div>
+          {canListen && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              disabled={isLoading}
+              title={isListening ? "Detener dictado" : "Dictar por voz"}
+              aria-label={isListening ? "Detener dictado" : "Dictar por voz"}
+              className={cn(
+                "w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-colors shrink-0 shadow-xs cursor-pointer disabled:opacity-40",
+                isListening
+                  ? "bg-red-500 text-white hover:bg-red-600 animate-pulse"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              )}
+            >
+              {isListening ? <Square className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+            </button>
+          )}
           <button
             type="submit"
             disabled={!inputText.trim() || isLoading}

@@ -1,18 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import type { Locale } from "../i18n/types";
 
 type Location = { latitude: number; longitude: number };
 
-export function useSedesLocation() {
+export type LocationErrorCode = "unsupported" | "denied" | "unknown" | null;
+
+// Google Maps doesn't support K'iche' as a UI language — fall back to Spanish.
+function mapsUiLanguage(locale: Locale): string {
+  return locale === "en" ? "en" : "es";
+}
+
+export function useSedesLocation(locale: Locale = "es") {
   const [location, setLocation] = useState<Location | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [locationError, setLocationError] = useState("");
+  const [locationErrorCode, setLocationErrorCode] = useState<LocationErrorCode>(null);
 
   const handleUpdateGps = () => {
-    setLocationError("");
+    setLocationErrorCode(null);
     if (!window.isSecureContext || !navigator.geolocation) {
-      setLocationError("La ubicación no está disponible en este navegador. Puedes explorar las oficinas directamente en el mapa.");
+      setLocationErrorCode("unsupported");
       return;
     }
     setIsLocating(true);
@@ -22,9 +30,7 @@ export function useSedesLocation() {
         setIsLocating(false);
       },
       (error) => {
-        setLocationError(error.code === 1
-          ? "No se autorizó el acceso a tu ubicación. Habilita el permiso para buscar cerca de ti o explora el mapa."
-          : "No pudimos obtener tu ubicación. Inténtalo de nuevo o explora el mapa.");
+        setLocationErrorCode(error.code === 1 ? "denied" : "unknown");
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
@@ -32,17 +38,24 @@ export function useSedesLocation() {
   };
 
   // Google Maps resolves the search results; no office data is fabricated locally.
+  // The search query text itself stays in Spanish regardless of locale — it's a
+  // technical parameter for Google's own index, not UI copy.
   const center = location ? `${location.latitude},${location.longitude}` : null;
   const query = center
     ? `Departamento de Tránsito PNC Guatemala cerca de ${center}`
     : "Departamento de Tránsito PNC Guatemala";
-  const embedParams = new URLSearchParams({ q: query, output: "embed", hl: "es", z: center ? "12" : "7" });
+  const embedParams = new URLSearchParams({
+    q: query,
+    output: "embed",
+    hl: mapsUiLanguage(locale),
+    z: center ? "12" : "7",
+  });
   if (center) embedParams.set("ll", center);
   const searchParams = new URLSearchParams({ api: "1", query });
 
   return {
     isLocating,
-    locationError,
+    locationErrorCode,
     gpsActive: !!location,
     handleUpdateGps,
     mapUrl: `https://www.google.com/maps?${embedParams}`,
