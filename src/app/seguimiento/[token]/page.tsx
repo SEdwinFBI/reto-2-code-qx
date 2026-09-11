@@ -7,8 +7,10 @@ export default async function SeguimientoPage({
 }) {
   const { token } = await params;
   return (
-    <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
-      <TrackerView token={token} />
+    <main className="min-h-screen bg-linear-to-b from-blue-50/40 via-white to-white px-4 py-10 sm:py-16">
+      <div className="mx-auto flex max-w-xl flex-col gap-4">
+        <TrackerView token={token} />
+      </div>
     </main>
   );
 }

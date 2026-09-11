@@ -13,9 +13,12 @@ import {
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
-import { SolicitudFormData, SolicitudResult, CausalTipo } from "../types";
+import { ConsultaEstado, SolicitudFormData, SolicitudResult } from "../types";
 import { CAUSALES } from "@/lib/causales";
+import { ALLOWED_FILE_TYPES, validateFile } from "@/lib/validation/solicitud";
 import { DpiSerieHelp } from "./DpiSerieHelp";
 
 interface SolicitudModalProps {
@@ -24,13 +27,18 @@ interface SolicitudModalProps {
   currentStep: number;
   formData: SolicitudFormData;
   updateField: <K extends keyof SolicitudFormData>(field: K, value: SolicitudFormData[K]) => void;
+  consultaEstado: ConsultaEstado;
   onConsultarPersona: () => void;
   nextStep: () => void;
   prevStep: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
   result: SolicitudResult | null;
+  error: string | null;
+  draftRestaurado: boolean;
 }
+
+const FILE_ACCEPT = ALLOWED_FILE_TYPES.join(",");
 
 export const SolicitudModal: React.FC<SolicitudModalProps> = ({
   isOpen,
@@ -38,16 +46,20 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
   currentStep,
   formData,
   updateField,
+  consultaEstado,
   onConsultarPersona,
   nextStep,
   prevStep,
   onSubmit,
   isSubmitting,
   result,
+  error,
+  draftRestaurado,
 }) => {
-  const [fileSimulations, setFileSimulations] = useState({
-    dpi: false,
-    comprobante: null as CausalTipo | null,
+  const [fileErrors, setFileErrors] = useState({
+    dpi: null as string | null,
+    comprobante: null as string | null,
+    autorizacion: null as string | null,
   });
 
   const motivos = [
@@ -76,12 +88,36 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
 
   const stepTitles = ["Información personal", "Información de tercero", "Información adicional", "Número de trámite solicitado", "Documentos"];
 
+  const datosConsultadosHabilitados =
+    consultaEstado === "encontrado" || consultaEstado === "no-encontrado" || formData.nombres.length > 0;
+
+  const handleFileChange = (
+    role: "dpi" | "comprobante" | "autorizacion",
+    field: "archivoDpi" | "archivoComprobante" | "archivoAutorizacion",
+    required: boolean,
+    label: string
+  ) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    const validationError = validateFile(file, { required, label });
+    setFileErrors((prev) => ({ ...prev, [role]: validationError }));
+    updateField(field, file);
+  };
+
+  const archivosCompletos =
+    !!formData.archivoDpi &&
+    !!formData.archivoComprobante &&
+    (!formData.esGestionadoPorTercero || !!formData.archivoAutorizacion) &&
+    !fileErrors.dpi &&
+    !fileErrors.comprobante &&
+    !fileErrors.autorizacion;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Solicitud de Exoneración de Multa de Tránsito"
       className="sm:max-w-2xl"
+      preventAccidentalClose
     >
       {/* Progress Bar */}
       {currentStep <= 5 && (
@@ -113,6 +149,15 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
       {/* Step 1: Datos Personales */}
       {currentStep === 1 && (
         <div className="space-y-6">
+        {draftRestaurado && (
+          <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>
+              Continuando una solicitud sin terminar. Si prefieres empezar de nuevo,
+              cierra y vuelve a abrir el formulario.
+            </span>
+          </div>
+        )}
         <form
           className="space-y-6"
           onSubmit={(event) => {
@@ -146,10 +191,11 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               />
               <div className="space-y-2">
                 <FormInput
-                label="Últimos 4 dígitos de serie"
+                label="Serie del DPI"
                 type="text"
                 inputMode="numeric"
-                pattern="[0-9]{4}"
+                placeholder="Ej. 1234"
+                pattern="\d{4}"
                 maxLength={4}
                 value={formData.serie}
                 onChange={(e) => updateField("serie", e.target.value)}
@@ -159,32 +205,56 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <Button type="submit">Consultar</Button>
+              <Button type="submit" disabled={consultaEstado === "loading"} className="gap-2">
+                {consultaEstado === "loading" && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {consultaEstado === "loading" ? "Consultando..." : "Consultar"}
+              </Button>
             </div>
           </fieldset>
           <fieldset className="space-y-4">
             <legend className="mb-2 text-sm font-semibold">Datos consultados</legend>
             <p className="text-sm text-muted-foreground">
-              Se completarán al consultar. Solo puedes editar el número de licencia.
+              {consultaEstado === "encontrado"
+                ? "Encontramos tu registro. Verifica los datos antes de continuar."
+                : consultaEstado === "no-encontrado"
+                  ? "No encontramos tus datos automáticamente. Complétalos manualmente."
+                  : "Pulsa Consultar para intentar completar estos datos automáticamente."}
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
               <FormInput
-                label="Nombre completo"
-                value={[formData.nombres, formData.apellidos].filter(Boolean).join(" ")}
-                readOnly
+                label="Nombres"
+                value={formData.nombres}
+                onChange={(e) => updateField("nombres", e.target.value)}
+                readOnly={!datosConsultadosHabilitados}
+                required
               />
-              </div>
-              <FormInput label="Nacionalidad" value={formData.nacionalidad} readOnly />
+              <FormInput
+                label="Apellidos"
+                value={formData.apellidos}
+                onChange={(e) => updateField("apellidos", e.target.value)}
+                readOnly={!datosConsultadosHabilitados}
+                required
+              />
+              <FormInput
+                label="Nacionalidad"
+                value={formData.nacionalidad}
+                onChange={(e) => updateField("nacionalidad", e.target.value)}
+                readOnly={!datosConsultadosHabilitados}
+                required
+              />
               <FormInput
                 label="No. de licencia"
                 value={formData.numeroLicencia}
                 onChange={(e) => updateField("numeroLicencia", e.target.value)}
+                readOnly={!datosConsultadosHabilitados}
+                required
               />
               <FormInput
                 label="País de emisión de licencia"
                 value={formData.paisEmisionLicencia}
-                readOnly
+                onChange={(e) => updateField("paisEmisionLicencia", e.target.value)}
+                readOnly={!datosConsultadosHabilitados}
+                required
               />
             </div>
           </fieldset>
@@ -193,7 +263,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
           className="space-y-6"
           onSubmit={(event) => {
             event.preventDefault();
-            if (formData.nombres) nextStep();
+            nextStep();
           }}
         >
           <fieldset className="space-y-4">
@@ -260,14 +330,17 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
                   type="email"
                   value={formData.correo}
                   onChange={(event) => updateField("correo", event.target.value)}
+                  required
                 />
               </div>
               <FormInput
                 id="solicitante-telefono"
                 label="Número de teléfono"
                 type="tel"
+                pattern=".*[0-9].*"
                 value={formData.telefono}
                 onChange={(event) => updateField("telefono", event.target.value)}
+                required
               />
               <FormInput
                 id="solicitante-telefono-alternativo"
@@ -299,60 +372,63 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={formData.tramitaTercero}
-                onChange={(event) => updateField("tramitaTercero", event.target.checked)}
+                checked={formData.esGestionadoPorTercero}
+                onChange={(event) => updateField("esGestionadoPorTercero", event.target.checked)}
                 aria-controls="datos-tercero"
-                aria-expanded={formData.tramitaTercero}
+                aria-expanded={formData.esGestionadoPorTercero}
               />
               Un tercero está realizando el trámite
             </label>
-            {formData.tramitaTercero && (
+            {formData.esGestionadoPorTercero && (
               <div id="datos-tercero" className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Completa todos los datos de la persona que realiza el trámite.
                 </p>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormInput
-                    id="tercero-cui"
+                    id="gestor-cui"
                     label="CUI (13 dígitos)"
                     inputMode="numeric"
                     pattern="[0-9]{13}"
                     maxLength={13}
-                    value={formData.terceroCui}
-                    onChange={(event) => updateField("terceroCui", event.target.value)}
+                    value={formData.gestorCui}
+                    onChange={(event) => updateField("gestorCui", event.target.value)}
                     required
                   />
                   <FormInput
-                    id="tercero-nombre"
+                    id="gestor-nombre"
                     label="Nombre completo"
                     pattern=".*\S.*"
-                    value={formData.terceroNombreCompleto}
-                    onChange={(event) => updateField("terceroNombreCompleto", event.target.value)}
+                    value={formData.gestorNombreCompleto}
+                    onChange={(event) => updateField("gestorNombreCompleto", event.target.value)}
                     required
                   />
                   <FormInput
                     label="Parentesco"
                     pattern=".*\S.*"
-                    value={formData.terceroParentesco}
-                    onChange={(event) => updateField("terceroParentesco", event.target.value)}
+                    value={formData.gestorRelacion}
+                    onChange={(event) => updateField("gestorRelacion", event.target.value)}
                     required
                   />
                   <FormInput
                     label="Correo electrónico"
                     type="email"
-                    value={formData.terceroCorreo}
-                    onChange={(event) => updateField("terceroCorreo", event.target.value)}
+                    value={formData.gestorCorreo}
+                    onChange={(event) => updateField("gestorCorreo", event.target.value)}
                     required
                   />
                   <FormInput
                     label="No. de teléfono"
                     type="tel"
                     pattern=".*[0-9].*"
-                    value={formData.terceroTelefono}
-                    onChange={(event) => updateField("terceroTelefono", event.target.value)}
+                    value={formData.gestorTelefono}
+                    onChange={(event) => updateField("gestorTelefono", event.target.value)}
                     required
                   />
                 </div>
+                <p className="text-xs text-slate-500">
+                  Deberás adjuntar el documento de autorización/carta poder en el paso de documentos.
+                </p>
               </div>
             )}
           </fieldset>
@@ -384,23 +460,32 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={formData.esTrabajadorPublico}
-                onChange={(event) => updateField("esTrabajadorPublico", event.target.checked)}
+                checked={formData.esEmpleadoGobierno}
+                onChange={(event) => updateField("esEmpleadoGobierno", event.target.checked)}
                 aria-controls="datos-trabajador-publico"
-                aria-expanded={formData.esTrabajadorPublico}
+                aria-expanded={formData.esEmpleadoGobierno}
               />
               Es funcionario o empleado público
             </label>
-            {formData.esTrabajadorPublico && (
-              <div id="datos-trabajador-publico">
+            {formData.esEmpleadoGobierno && (
+              <div id="datos-trabajador-publico" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormInput
-                  id="institucion-puesto"
-                  label="Institución y puesto que ocupa"
+                  id="empleado-institucion"
+                  label="Institución"
                   type="text"
                   pattern=".*\S.*"
                   required
-                  value={formData.institucionYPuesto}
-                  onChange={(event) => updateField("institucionYPuesto", event.target.value)}
+                  value={formData.empleadoInstitucion}
+                  onChange={(event) => updateField("empleadoInstitucion", event.target.value)}
+                />
+                <FormInput
+                  id="empleado-puesto"
+                  label="Puesto que ocupa"
+                  type="text"
+                  pattern=".*\S.*"
+                  required
+                  value={formData.empleadoPuesto}
+                  onChange={(event) => updateField("empleadoPuesto", event.target.value)}
                 />
               </div>
             )}
@@ -475,6 +560,23 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             ))}
           </fieldset>
 
+          <div className="grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2">
+            <FormInput
+              label="Fecha de vencimiento de la licencia"
+              type="date"
+              required
+              value={formData.fechaVencimiento}
+              onChange={(event) => updateField("fechaVencimiento", event.target.value)}
+            />
+            <FormInput
+              label="Fecha del hecho (viaje, enfermedad o reclusión)"
+              type="date"
+              required
+              value={formData.fechaHecho}
+              onChange={(event) => updateField("fechaHecho", event.target.value)}
+            />
+          </div>
+
           <div className="border-t pt-6">
             <FormTextarea
               label="Favor llenar un breve resumen de su solicitud"
@@ -505,78 +607,169 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
       {currentStep === 5 && (
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            Adjunta los 2 documentos requeridos en formato PDF o imagen legible:
+            Adjunta los documentos requeridos en formato PDF o imagen legible (máx. 5 MB c/u):
           </p>
 
           <div className="space-y-3">
             {/* DPI requerido para todos los trámites */}
-            <div className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-blue-600 shrink-0" />
-                <div>
-                  <h5 className="text-xs font-bold text-slate-900">
-                    1. Fotocopia de DPI de ambos lados
-                  </h5>
-                  <p className="text-[11px] text-slate-500">
-                    Vigente y completamente legible.
-                  </p>
+            <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-900">
+                      1. Fotocopia de DPI de ambos lados <span className="text-red-600" aria-hidden="true">*</span>
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      Vigente y completamente legible.
+                    </p>
+                  </div>
                 </div>
+                <label className="shrink-0">
+                  <input
+                    type="file"
+                    accept={FILE_ACCEPT}
+                    required
+                    className="sr-only"
+                    onChange={handleFileChange("dpi", "archivoDpi", true, "El DPI")}
+                  />
+                  <span className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-input px-3 text-sm font-medium hover:bg-slate-100">
+                    {formData.archivoDpi ? (
+                      <span className="flex items-center gap-1 text-emerald-700">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <Upload className="w-3.5 h-3.5" /> Subir
+                      </span>
+                    )}
+                  </span>
+                </label>
               </div>
-              <Button
-                variant={fileSimulations.dpi ? "secondary" : "outline"}
-                size="sm"
-                type="button"
-                onClick={() => setFileSimulations((p) => ({ ...p, dpi: !p.dpi }))}
-              >
-                {fileSimulations.dpi ? (
-                  <span className="flex items-center gap-1 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Upload className="w-3.5 h-3.5" /> Subir
-                  </span>
-                )}
-              </Button>
+              {formData.archivoDpi && (
+                <p className="pl-8 text-[11px] text-slate-500 truncate">{formData.archivoDpi.name}</p>
+              )}
+              {fileErrors.dpi && (
+                <p className="pl-8 flex items-center gap-1 text-[11px] text-red-600">
+                  <AlertTriangle className="w-3 h-3" /> {fileErrors.dpi}
+                </p>
+              )}
             </div>
 
             {/* Constancia correspondiente al trámite */}
-            <div className="border border-slate-200 rounded-xl p-3.5 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-blue-600 shrink-0" />
-                <div>
-                  <h5 className="text-xs font-bold text-slate-900">
-                    2. {formData.causal === "PRIVADO_LIBERTAD"
-                      ? "Constancia de estadía en prisión"
-                      : formData.causal === "ENFERMEDAD_ACCIDENTE"
-                        ? "Constancia de consulta médica por colegiado activo"
-                        : "Constancia de movimiento migratorio"}
-                  </h5>
-                  <p className="text-[11px] text-slate-500">
-                    Adjunta una copia completamente legible.
-                  </p>
+            <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-900">
+                      2. {formData.causal === "PRIVADO_LIBERTAD"
+                        ? "Constancia de estadía en prisión"
+                        : formData.causal === "ENFERMEDAD_ACCIDENTE"
+                          ? "Constancia de consulta médica por colegiado activo"
+                          : "Constancia de movimiento migratorio"}{" "}
+                      <span className="text-red-600" aria-hidden="true">*</span>
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      Adjunta una copia completamente legible.
+                    </p>
+                  </div>
                 </div>
+                <label className="shrink-0">
+                  <input
+                    type="file"
+                    accept={FILE_ACCEPT}
+                    required
+                    className="sr-only"
+                    onChange={handleFileChange(
+                      "comprobante",
+                      "archivoComprobante",
+                      true,
+                      `El comprobante (${CAUSALES[formData.causal].requisitoComprobante})`
+                    )}
+                  />
+                  <span className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-input px-3 text-sm font-medium hover:bg-slate-100">
+                    {formData.archivoComprobante ? (
+                      <span className="flex items-center gap-1 text-emerald-700">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <Upload className="w-3.5 h-3.5" /> Subir
+                      </span>
+                    )}
+                  </span>
+                </label>
               </div>
-              <Button
-                variant={fileSimulations.comprobante === formData.causal ? "secondary" : "outline"}
-                size="sm"
-                type="button"
-                onClick={() =>
-                  setFileSimulations((p) => ({ ...p, comprobante: p.comprobante === formData.causal ? null : formData.causal }))
-                }
-              >
-                {fileSimulations.comprobante === formData.causal ? (
-                  <span className="flex items-center gap-1 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Upload className="w-3.5 h-3.5" /> Subir
-                  </span>
-                )}
-              </Button>
+              {formData.archivoComprobante && (
+                <p className="pl-8 text-[11px] text-slate-500 truncate">{formData.archivoComprobante.name}</p>
+              )}
+              {fileErrors.comprobante && (
+                <p className="pl-8 flex items-center gap-1 text-[11px] text-red-600">
+                  <AlertTriangle className="w-3 h-3" /> {fileErrors.comprobante}
+                </p>
+              )}
             </div>
+
+            {/* Autorización / carta poder, solo si un tercero gestiona el trámite */}
+            {formData.esGestionadoPorTercero && (
+              <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-900">
+                        3. Documento de autorización / carta poder <span className="text-red-600" aria-hidden="true">*</span>
+                      </h5>
+                      <p className="text-[11px] text-slate-500">
+                        Autoriza al gestor a presentar el trámite en tu nombre.
+                      </p>
+                    </div>
+                  </div>
+                  <label className="shrink-0">
+                    <input
+                      type="file"
+                      accept={FILE_ACCEPT}
+                      required
+                      className="sr-only"
+                      onChange={handleFileChange(
+                        "autorizacion",
+                        "archivoAutorizacion",
+                        true,
+                        "El documento de autorización/carta poder"
+                      )}
+                    />
+                    <span className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-input px-3 text-sm font-medium hover:bg-slate-100">
+                      {formData.archivoAutorizacion ? (
+                        <span className="flex items-center gap-1 text-emerald-700">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Adjunto
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1">
+                          <Upload className="w-3.5 h-3.5" /> Subir
+                        </span>
+                      )}
+                    </span>
+                  </label>
+                </div>
+                {formData.archivoAutorizacion && (
+                  <p className="pl-8 text-[11px] text-slate-500 truncate">{formData.archivoAutorizacion.name}</p>
+                )}
+                {fileErrors.autorizacion && (
+                  <p className="pl-8 flex items-center gap-1 text-[11px] text-red-600">
+                    <AlertTriangle className="w-3 h-3" /> {fileErrors.autorizacion}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between pt-4">
             <Button variant="ghost" type="button" onClick={prevStep} className="gap-2">
@@ -585,7 +778,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({
             <Button
               type="button"
               onClick={onSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !archivosCompletos}
               className="gap-2"
             >
               {isSubmitting ? "Radicando Expediente..." : "Radicar Solicitud Oficial"}

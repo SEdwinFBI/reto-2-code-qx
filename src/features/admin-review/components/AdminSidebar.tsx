@@ -25,7 +25,7 @@ export function AdminSidebar() {
           <ShieldCheck className="h-5 w-5 text-gold-500" />
         </div>
         <div className="flex min-w-0 flex-col">
-          <span className="truncate text-xs font-semibold tracking-wide text-white uppercase">
+          <span className="truncate font-display text-sm font-semibold tracking-wide text-white">
             PNC Tránsito
           </span>
           <span className="truncate text-[11px] text-navy-200/80">Gestor de Solicitudes</span>

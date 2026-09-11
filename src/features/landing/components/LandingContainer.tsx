@@ -46,12 +46,15 @@ export const LandingContainer: React.FC = () => {
     currentStep,
     formData,
     updateField,
+    consultaEstado,
     consultarPersona,
     nextStep,
     prevStep,
     submitSolicitud,
     isSubmitting: isSolicitudSubmitting,
     result: solicitudResult,
+    error: solicitudError,
+    draftRestaurado,
   } = useSolicitud();
 
   return (
@@ -100,12 +103,15 @@ export const LandingContainer: React.FC = () => {
         currentStep={currentStep}
         formData={formData}
         updateField={updateField}
+        consultaEstado={consultaEstado}
         onConsultarPersona={consultarPersona}
         nextStep={nextStep}
         prevStep={prevStep}
         onSubmit={submitSolicitud}
         isSubmitting={isSolicitudSubmitting}
         result={solicitudResult}
+        error={solicitudError}
+        draftRestaurado={draftRestaurado}
       />
 
       {/* Modal del asistente virtual */}
