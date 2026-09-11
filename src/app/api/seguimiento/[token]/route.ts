@@ -24,6 +24,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       estado: true,
       motivoRechazo: true,
       createdAt: true,
+      historial: {
+        orderBy: { createdAt: "asc" },
+        select: { estadoNuevo: true, createdAt: true },
+      },
     },
   });
 
@@ -39,5 +43,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     motivoRechazo: solicitud.motivoRechazo,
     fechaRadicacion: solicitud.createdAt.toISOString(),
     plazoDiasHabiles: PLAZO_DIAS_HABILES,
+    // Solo estadoNuevo + fecha por transición — nunca actor ni nota (info interna de revisión).
+    historial: solicitud.historial.map((h) => ({
+      estadoNuevo: h.estadoNuevo,
+      createdAt: h.createdAt.toISOString(),
+    })),
   });
 }
