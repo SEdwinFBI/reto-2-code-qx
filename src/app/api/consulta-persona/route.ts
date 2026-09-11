@@ -6,18 +6,10 @@ export const runtime = "nodejs";
 
 const perfiles = perfilesData.perfiles as PerfilPrueba[];
 
-/** Simula la latencia de una consulta externa (SAT/RENAP). */
+// Simula la latencia de una consulta externa de identidad.
 const CONSULTA_SIMULADA_MS = 5000;
 
-/**
- * Endpoint público que simula la consulta de identidad de una persona (tipo
- * SAT/RENAP) contra un banco de perfiles de prueba (src/data/perfiles-prueba.json),
- * sin conexión a ningún servicio externo real ni a base de datos.
- * Busca coincidencia exacta por cui + fechaNacimiento + serie.
- * Si no hay coincidencia, responde 404 con un cuerpo JSON — no es un error del
- * servidor, es un resultado válido de "no encontrado" que el cliente debe manejar
- * cayendo a llenado manual.
- */
+// Simulación de consulta de identidad contra banco de perfiles de prueba.
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const parsed = consultaPersonaSchema.safeParse(body);
@@ -46,8 +38,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // id/genero son metadata interna del banco de prueba; el cliente solo usa los
-  // campos que coinciden con SolicitudFormData, así que se devuelve el perfil tal
-  // cual y el cliente ignora el resto.
+  // Devuelve los datos del perfil coincidente para prerellenar el formulario.
   return NextResponse.json(perfil, { status: 200 });
 }
