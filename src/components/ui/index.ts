@@ -13,3 +13,7 @@ export * from "./table";
 export * from "./select";
 export * from "./textarea";
 export * from "./sonner";
+export * from "./tabs";
+export * from "./dropdown-menu";
+export * from "./pagination";
+export * from "./skeleton";

@@ -40,7 +40,7 @@ export function useSolicitudDetail(id: string) {
 
   async function ejecutarAccion(
     accion: SolicitudAccion,
-    extra?: { motivoRechazo?: string; nota?: string }
+    extra?: { motivoRechazo?: string; nota?: string; archivoResolucion?: File }
   ) {
     setIsSubmittingAccion(true);
     setError(null);

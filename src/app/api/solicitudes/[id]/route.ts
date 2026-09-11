@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSignedUrl } from "@/lib/firebase-storage";
+import {
+  buildSolicitudFilePath,
+  getSignedUrl,
+  uploadSolicitudFile,
+} from "@/lib/firebase-storage";
+import { validateFile } from "@/lib/validation/solicitud";
 import { sendEnRevisionEmail, sendResolucionEmail } from "@/lib/mailer";
 import { verifySessionToken, ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
+import type { CausalKey } from "@/lib/causales";
 import type { PrismaTransactionClient } from "@/lib/prisma";
 import type { EstadoSolicitud } from "../../../../../generated/prisma/enums";
 
@@ -30,11 +36,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Solicitud no encontrada." }, { status: 404 });
   }
 
-  const [dpiUrl, comprobanteUrl, autorizacionUrl] = await Promise.all([
+  const [dpiUrl, comprobanteUrl, autorizacionUrl, resolucionUrl] = await Promise.all([
     getSignedUrl(solicitud.dpiStoragePath),
     getSignedUrl(solicitud.comprobanteStoragePath),
     solicitud.autorizacionStoragePath
       ? getSignedUrl(solicitud.autorizacionStoragePath)
+      : Promise.resolve(null),
+    solicitud.resolucionStoragePath
+      ? getSignedUrl(solicitud.resolucionStoragePath)
       : Promise.resolve(null),
   ]);
 
@@ -43,6 +52,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     dpiUrl,
     comprobanteUrl,
     autorizacionUrl,
+    resolucionUrl,
   });
 }
 
@@ -65,23 +75,44 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
-  const body = await request.json().catch(() => null);
-  const accion = body?.accion as string | undefined;
-  const motivoRechazo = body?.motivoRechazo as string | undefined;
-  const nota = body?.nota as string | undefined;
 
-  if (!accion || !(accion in TRANSITIONS)) {
+  const formData = await request.formData();
+  const accion = formData.get("accion");
+  const motivoRechazo = formData.get("motivoRechazo");
+  const nota = formData.get("nota");
+  const archivoResolucionField = formData.get("archivoResolucion");
+
+  const accionStr = typeof accion === "string" ? accion : undefined;
+  const motivoRechazoStr = typeof motivoRechazo === "string" ? motivoRechazo : undefined;
+  const notaStr = typeof nota === "string" ? nota : undefined;
+  const archivoResolucion =
+    archivoResolucionField instanceof File ? archivoResolucionField : null;
+
+  if (!accionStr || !(accionStr in TRANSITIONS)) {
     return NextResponse.json(
       { error: "Acción inválida. Use iniciar_revision, aprobar o rechazar." },
       { status: 400 }
     );
   }
 
-  if (accion === "rechazar" && !motivoRechazo) {
+  if (accionStr === "rechazar" && !motivoRechazoStr) {
     return NextResponse.json(
       { error: "motivoRechazo es obligatorio al rechazar." },
       { status: 400 }
     );
+  }
+
+  if (accionStr === "aprobar") {
+    const fileError = validateFile(archivoResolucion, {
+      required: true,
+      label: "El documento de resolución/exoneración",
+    });
+    if (fileError) {
+      return NextResponse.json(
+        { error: "Archivo inválido.", details: fileError },
+        { status: 400 }
+      );
+    }
   }
 
   const solicitud = await prisma.solicitud.findUnique({ where: { id } });
@@ -89,7 +120,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Solicitud no encontrada." }, { status: 404 });
   }
 
-  const nuevoEstado = TRANSITIONS[accion];
+  const nuevoEstado = TRANSITIONS[accionStr];
   if (!ALLOWED_FROM[solicitud.estado].includes(nuevoEstado)) {
     return NextResponse.json(
       {
@@ -102,16 +133,38 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const actor = "admin";
   const now = new Date();
 
+  let resolucionUpload: { storagePath: string } | null = null;
+  if (accionStr === "aprobar" && archivoResolucion) {
+    resolucionUpload = await uploadSolicitudFile({
+      buffer: Buffer.from(await archivoResolucion.arrayBuffer()),
+      destinationPath: buildSolicitudFilePath(
+        solicitud.numeroExpediente,
+        "resolucion",
+        archivoResolucion.type
+      ),
+      contentType: archivoResolucion.type,
+    });
+  }
+
   const updated = await prisma.$transaction(async (tx: PrismaTransactionClient) => {
     const result = await tx.solicitud.update({
       where: { id },
       data: {
         estado: nuevoEstado,
-        ...(accion === "iniciar_revision" ? { revisadoPor: actor } : {}),
-        ...(accion === "rechazar" ? { motivoRechazo } : {}),
-        ...(nota ? { notaRevisor: nota } : {}),
-        ...(accion === "aprobar" || accion === "rechazar"
+        ...(accionStr === "iniciar_revision" ? { revisadoPor: actor } : {}),
+        ...(accionStr === "rechazar" ? { motivoRechazo: motivoRechazoStr } : {}),
+        ...(notaStr ? { notaRevisor: notaStr } : {}),
+        ...(accionStr === "aprobar" || accionStr === "rechazar"
           ? { resueltoPor: actor, resueltoEn: now }
+          : {}),
+        ...(resolucionUpload && archivoResolucion
+          ? {
+              resolucionStoragePath: resolucionUpload.storagePath,
+              resolucionOriginalName: archivoResolucion.name,
+              resolucionContentType: archivoResolucion.type,
+              resolucionSizeBytes: archivoResolucion.size,
+              resolucionUploadedAt: now,
+            }
           : {}),
       },
     });
@@ -122,7 +175,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         estadoAnterior: solicitud.estado,
         estadoNuevo: nuevoEstado,
         actor,
-        nota,
+        nota: notaStr,
       },
     });
 
@@ -133,19 +186,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     ? updated.gestorCorreo!
     : updated.correo;
 
-  if (accion === "iniciar_revision") {
+  if (accionStr === "iniciar_revision") {
     await sendEnRevisionEmail({
       to: destinatario,
       numeroExpediente: updated.numeroExpediente,
       trackerToken: updated.trackerToken,
+      causal: updated.causal as CausalKey,
     });
   } else {
     await sendResolucionEmail({
       to: destinatario,
       numeroExpediente: updated.numeroExpediente,
       trackerToken: updated.trackerToken,
-      aprobado: accion === "aprobar",
+      aprobado: accionStr === "aprobar",
       motivoRechazo: updated.motivoRechazo ?? undefined,
+      causal: updated.causal as CausalKey,
     });
   }
 

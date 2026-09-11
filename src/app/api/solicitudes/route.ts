@@ -198,6 +198,7 @@ export async function POST(request: NextRequest) {
       numeroExpediente: solicitud.numeroExpediente,
       trackerToken: solicitud.trackerToken,
       plazoDiasHabiles: PLAZO_DIAS_HABILES,
+      causal,
     });
 
     const base = process.env.APP_BASE_URL || "http://localhost:3000";
@@ -223,35 +224,78 @@ export async function POST(request: NextRequest) {
   }
 }
 
+const ESTADOS_VALIDOS = ["PENDIENTE", "EN_REVISION", "APROBADA", "RECHAZADA"] as const;
+type EstadoValido = (typeof ESTADOS_VALIDOS)[number];
+
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
+function parsePositiveInt(value: string | null, fallback: number, max?: number): number {
+  const parsed = value ? Number.parseInt(value, 10) : NaN;
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return max ? Math.min(parsed, max) : parsed;
+}
+
 export async function GET(request: NextRequest) {
   const cookie = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   if (!(await verifySessionToken(cookie))) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  const estadoParam = request.nextUrl.searchParams.get("estado");
+  const params = request.nextUrl.searchParams;
+
+  const estadoParam = params.get("estado");
   const estado =
-    estadoParam && ["PENDIENTE", "EN_REVISION", "APROBADA", "RECHAZADA"].includes(estadoParam)
-      ? (estadoParam as "PENDIENTE" | "EN_REVISION" | "APROBADA" | "RECHAZADA")
+    estadoParam && (ESTADOS_VALIDOS as readonly string[]).includes(estadoParam)
+      ? (estadoParam as EstadoValido)
       : undefined;
 
-  const solicitudes = await prisma.solicitud.findMany({
-    where: estado ? { estado } : undefined,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      numeroExpediente: true,
-      nombres: true,
-      apellidos: true,
-      causal: true,
-      estado: true,
-      esGestionadoPorTercero: true,
-      gestorNombreCompleto: true,
-      gestorRelacion: true,
-      esEmpleadoGobierno: true,
-      createdAt: true,
-    },
-  });
+  const q = params.get("q")?.trim();
+  const page = parsePositiveInt(params.get("page"), 1);
+  const pageSize = parsePositiveInt(params.get("pageSize"), DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-  return NextResponse.json({ solicitudes });
+  const where = {
+    ...(estado ? { estado } : {}),
+    ...(q
+      ? {
+          OR: [
+            { numeroExpediente: { contains: q, mode: "insensitive" as const } },
+            { cui: { contains: q, mode: "insensitive" as const } },
+            { nombres: { contains: q, mode: "insensitive" as const } },
+            { apellidos: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const [solicitudes, total, countsRaw] = await Promise.all([
+    prisma.solicitud.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: {
+        id: true,
+        numeroExpediente: true,
+        nombres: true,
+        apellidos: true,
+        causal: true,
+        estado: true,
+        esGestionadoPorTercero: true,
+        gestorNombreCompleto: true,
+        gestorRelacion: true,
+        esEmpleadoGobierno: true,
+        createdAt: true,
+      },
+    }),
+    prisma.solicitud.count({ where }),
+    prisma.solicitud.groupBy({ by: ["estado"], _count: { _all: true } }),
+  ]);
+
+  const countsByEstado = countsRaw.reduce<Record<string, number>>((acc, row) => {
+    acc[row.estado] = row._count._all;
+    return acc;
+  }, {});
+
+  return NextResponse.json({ solicitudes, total, page, pageSize, countsByEstado });
 }

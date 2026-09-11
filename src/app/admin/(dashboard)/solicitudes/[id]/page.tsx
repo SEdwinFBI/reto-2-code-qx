@@ -7,8 +7,8 @@ export default async function AdminSolicitudDetailPage({
 }) {
   const { id } = await params;
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
       <SolicitudDetailPanel id={id} />
-    </main>
+    </div>
   );
 }

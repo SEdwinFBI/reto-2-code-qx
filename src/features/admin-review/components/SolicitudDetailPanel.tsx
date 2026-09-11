@@ -12,6 +12,7 @@ export function SolicitudDetailPanel({ id }: { id: string }) {
     useSolicitudDetail(id);
   const [motivoRechazo, setMotivoRechazo] = useState("");
   const [nota, setNota] = useState("");
+  const [archivoResolucion, setArchivoResolucion] = useState<File | null>(null);
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Cargando…</p>;
   if (error) return <p className="text-sm text-destructive">{error}</p>;
@@ -22,9 +23,14 @@ export function SolicitudDetailPanel({ id }: { id: string }) {
       toast.error("Debe indicar el motivo de rechazo.");
       return;
     }
+    if (accion === "aprobar" && !archivoResolucion) {
+      toast.error("Debe adjuntar el documento de resolución/exoneración.");
+      return;
+    }
     const ok = await ejecutarAccion(accion, {
       motivoRechazo: accion === "rechazar" ? motivoRechazo : undefined,
       nota: nota || undefined,
+      archivoResolucion: accion === "aprobar" ? (archivoResolucion ?? undefined) : undefined,
     });
     if (ok) {
       toast.success(
@@ -105,6 +111,16 @@ export function SolicitudDetailPanel({ id }: { id: string }) {
             Autorización / carta poder — {solicitud.autorizacionOriginalName}
           </a>
         )}
+        {solicitud.resolucionUrl && (
+          <a
+            href={solicitud.resolucionUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Resolución / exoneración — {solicitud.resolucionOriginalName}
+          </a>
+        )}
       </Card>
 
       {(solicitud.estado === "PENDIENTE" || solicitud.estado === "EN_REVISION") && (
@@ -120,6 +136,18 @@ export function SolicitudDetailPanel({ id }: { id: string }) {
             value={motivoRechazo}
             onChange={(e) => setMotivoRechazo(e.target.value)}
           />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium" htmlFor="archivoResolucion">
+              Documento de resolución/exoneración (obligatorio solo si aprueba)
+            </label>
+            <input
+              id="archivoResolucion"
+              type="file"
+              accept="application/pdf,image/jpeg,image/png"
+              onChange={(e) => setArchivoResolucion(e.target.files?.[0] ?? null)}
+              className="text-sm"
+            />
+          </div>
           <div className="flex flex-wrap gap-2">
             {solicitud.estado === "PENDIENTE" && (
               <Button
